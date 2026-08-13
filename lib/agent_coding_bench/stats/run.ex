@@ -27,13 +27,9 @@ defmodule AgentCodingBench.Stats.Run do
     |> put_change(:started_at, started_at)
     |> put_change(:fingerprint, capture.fingerprint)
     |> put_change(:fingerprint_digest, capture.digest)
-  end
-
-  @doc false
-  def stop_changeset(run, capture, ended_at) do
-    change(run,
-      ended_at: ended_at,
-      fingerprint_mismatch: run.fingerprint_digest != capture.digest
+    |> unique_constraint(:ended_at,
+      name: :runs_one_active_index,
+      message: "another Run is already active"
     )
   end
 end

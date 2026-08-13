@@ -17,7 +17,7 @@ defmodule AgentCodingBenchWeb.Router do
   scope "/", AgentCodingBenchWeb do
     pipe_through :browser
 
-    get "/", PageController, :home
+    live "/", WorldLive
   end
 
   # Other scopes may use custom stacks.

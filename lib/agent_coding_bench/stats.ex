@@ -7,12 +7,27 @@ defmodule AgentCodingBench.Stats do
   alias AgentCodingBench.Repo
   alias AgentCodingBench.Stats.Run
 
+  import Ecto.Query, only: [from: 2]
+
+  @doc """
+  Returns the most recently started open Run, if one exists.
+  """
+  @spec active_run() :: Run.t() | nil
+  def active_run do
+    Repo.one(
+      from run in Run,
+        where: is_nil(run.ended_at),
+        order_by: [desc: run.started_at],
+        limit: 1
+    )
+  end
+
   @doc """
   Starts a Run after capturing the serving fingerprint.
   """
   @spec start_run(map(), keyword()) :: {:ok, Run.t()} | {:error, term()}
   def start_run(attrs, opts \\ []) when is_map(attrs) do
-    box = Keyword.get(opts, :box, Box)
+    box = Keyword.get(opts, :box, configured_box())
 
     with {:ok, capture} <- box.capture_fingerprint() do
       %Run{}
@@ -28,16 +43,37 @@ defmodule AgentCodingBench.Stats do
   def stop_run(run, opts \\ [])
 
   def stop_run(%Run{ended_at: nil} = run, opts) do
-    box = Keyword.get(opts, :box, Box)
+    box = Keyword.get(opts, :box, configured_box())
 
     with {:ok, capture} <- box.capture_fingerprint() do
-      run
-      |> Run.stop_changeset(capture, DateTime.utc_now())
-      |> Repo.update()
+      stopped_at = DateTime.utc_now()
+
+      query =
+        from stored_run in Run,
+          where: stored_run.id == ^run.id and is_nil(stored_run.ended_at),
+          select: stored_run
+
+      case Repo.update_all(query,
+             set: [
+               ended_at: stopped_at,
+               fingerprint_mismatch: run.fingerprint_digest != capture.digest
+             ]
+           ) do
+        {1, [stopped_run]} -> {:ok, stopped_run}
+        {0, []} -> already_stopped_error(run)
+      end
     end
   end
 
   def stop_run(%Run{} = run, _opts) do
+    already_stopped_error(run)
+  end
+
+  defp configured_box do
+    Application.get_env(:agent_coding_bench, :stats_box, Box)
+  end
+
+  defp already_stopped_error(run) do
     {:error,
      Ecto.Changeset.add_error(Ecto.Changeset.change(run), :ended_at, "run is already stopped")}
   end

@@ -6,7 +6,10 @@ defmodule AgentCodingBench.BoxFake do
   end
 
   def capture_fingerprint do
-    Process.get({__MODULE__, :capture})
+    Process.get(
+      {__MODULE__, :capture},
+      {:ok, %{fingerprint: %{"model" => "test-model"}, digest: "test-digest"}}
+    )
   end
 
   def scrape_metrics do
