@@ -3,8 +3,22 @@ defmodule AgentCodingBench.CastTest do
 
   alias AgentCodingBench.Cast
   alias AgentCodingBench.Stats.Call
+  alias AgentCodingBench.World
 
-  test "complete returns streamed prose and records client-observed usage" do
+  setup do
+    {:ok, task} =
+      World.create_task(%{
+        lane: 4,
+        world_repo: "wojtekmach/req",
+        title: "Test task",
+        description: "Exercise one observed completion.",
+        persona_card: %{"name" => "Rina"}
+      })
+
+    %{task: task}
+  end
+
+  test "complete returns streamed prose and records client-observed usage", %{task: task} do
     request = fn opts ->
       assert opts[:url] == "http://vllm.test/v1/chat/completions"
       assert opts[:json]["stream"]
@@ -24,16 +38,18 @@ defmodule AgentCodingBench.CastTest do
     assert {:ok, "Review complete"} =
              Cast.complete(
                [%{role: "user", content: "Review this diff"}],
-               %{lane: 4, role: :reviewer, task_id: 91},
+               %{lane: 4, role: :reviewer, task_id: task.id},
                request: request,
                model: "test-model",
                vllm_url: "http://vllm.test"
              )
 
+    task_id = task.id
+
     assert %Call{
              lane: 4,
              role: "reviewer",
-             task_id: 91,
+             task_id: ^task_id,
              prompt_tokens: 21,
              completion_tokens: 5,
              reasoning_tokens: 2,
@@ -46,7 +62,7 @@ defmodule AgentCodingBench.CastTest do
     assert duration_ms >= ttft_ms
   end
 
-  test "records an observed completion even when the model returns no prose" do
+  test "records an observed completion even when the model returns no prose", %{task: task} do
     request = fn opts ->
       chunks = [
         ~s(data: {"choices":[],"usage":{"prompt_tokens":7,"completion_tokens":0}}\n\n),
@@ -59,7 +75,7 @@ defmodule AgentCodingBench.CastTest do
     assert {:error, :empty_completion} =
              Cast.complete(
                [%{role: "user", content: "Review this diff"}],
-               %{lane: 4, role: :reviewer, task_id: 91},
+               %{lane: 4, role: :reviewer, task_id: task.id},
                request: request,
                model: "test-model",
                vllm_url: "http://vllm.test"

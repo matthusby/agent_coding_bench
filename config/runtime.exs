@@ -31,6 +31,66 @@ config :agent_coding_bench, AgentCodingBench.Box,
 config :agent_coding_bench, AgentCodingBench.World.Cast,
   diff_char_cap: String.to_integer(System.get_env("REVIEW_DIFF_CHAR_CAP", "60000"))
 
+world_root = System.get_env("WORLD_ROOT", "/root/world")
+
+world_repos =
+  [
+    %{
+      slug: "wojtekmach/req",
+      clone_directory: "req",
+      upstream_url: "https://github.com/wojtekmach/req.git"
+    },
+    %{
+      slug: "oban-bg/oban",
+      clone_directory: "oban",
+      upstream_url: "https://github.com/oban-bg/oban.git"
+    },
+    %{
+      slug: "supabase/realtime",
+      clone_directory: "realtime",
+      upstream_url: "https://github.com/supabase/realtime.git"
+    },
+    %{
+      slug: "livebook-dev/livebook",
+      clone_directory: "livebook",
+      upstream_url: "https://github.com/livebook-dev/livebook.git"
+    },
+    %{
+      slug: "pallets/flask",
+      clone_directory: "flask",
+      upstream_url: "https://github.com/pallets/flask.git"
+    },
+    %{
+      slug: "pydantic/pydantic",
+      clone_directory: "pydantic",
+      upstream_url: "https://github.com/pydantic/pydantic.git"
+    },
+    %{
+      slug: "honojs/hono",
+      clone_directory: "hono",
+      upstream_url: "https://github.com/honojs/hono.git"
+    },
+    %{
+      slug: "excalidraw/excalidraw",
+      clone_directory: "excalidraw",
+      upstream_url: "https://github.com/excalidraw/excalidraw.git"
+    }
+  ]
+  |> Enum.map(fn repo ->
+    Map.put(
+      repo,
+      :mirror_path,
+      Path.join([world_root, "mirrors", repo.clone_directory <> ".git"])
+    )
+  end)
+
+config :agent_coding_bench, AgentCodingBench.World.Lane,
+  repos: world_repos,
+  clone_root: Path.join(world_root, "lanes"),
+  inactivity_timeout: String.to_integer(System.get_env("LANE_INACTIVITY_TIMEOUT_MS", "600000")),
+  task_timeout: String.to_integer(System.get_env("TASK_TIMEOUT_MS", "3600000")),
+  invention_retry_delay: String.to_integer(System.get_env("INVENTION_RETRY_DELAY_MS", "5000"))
+
 if config_env() == :prod do
   database_url =
     System.get_env("DATABASE_URL") ||

@@ -41,5 +41,6 @@ defmodule AgentCodingBench.Stats.Call do
     |> validate_number(:cached_tokens, greater_than_or_equal_to: 0)
     |> validate_number(:ttft_ms, greater_than_or_equal_to: 0)
     |> validate_number(:duration_ms, greater_than_or_equal_to: 0)
+    |> foreign_key_constraint(:task_id)
   end
 end
