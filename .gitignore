@@ -35,3 +35,6 @@ agent_coding_bench-*.tar
 npm-debug.log
 /assets/node_modules/
 
+
+# Claude Code agent worktrees
+/.claude/
