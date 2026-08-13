@@ -10,7 +10,8 @@ defmodule AgentCodingBench.Application do
     children = [
       AgentCodingBenchWeb.Telemetry,
       AgentCodingBench.Repo,
-      {DNSCluster, query: Application.get_env(:agent_coding_bench, :dns_cluster_query) || :ignore},
+      {DNSCluster,
+       query: Application.get_env(:agent_coding_bench, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: AgentCodingBench.PubSub},
       # Start a worker by calling: AgentCodingBench.Worker.start_link(arg)
       # {AgentCodingBench.Worker, arg},

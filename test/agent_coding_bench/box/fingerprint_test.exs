@@ -24,4 +24,11 @@ defmodule AgentCodingBench.Box.FingerprintTest do
     assert Fingerprint.digest(fingerprint) ==
              "984ae617199b20a3a7abba5e6f32b62287d4671ee91b666b8b6c759cd158d57b"
   end
+
+  test "digest excludes the live metrics snapshot" do
+    stable_facts = %{"model" => "deepseek-v4"}
+
+    assert Fingerprint.digest(Map.put(stable_facts, "metrics_snapshot_t0", "counter 1")) ==
+             Fingerprint.digest(Map.put(stable_facts, "metrics_snapshot_t0", "counter 2"))
+  end
 end

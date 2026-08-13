@@ -82,15 +82,27 @@ defmodule AgentCodingBench.Box.Fingerprint do
   end
 
   @doc """
-  Returns the lowercase SHA-256 digest of the canonical fingerprint JSON.
+  Returns the lowercase SHA-256 digest of the stable serving configuration.
+
+  The raw t0 metrics snapshot remains part of the stored fingerprint, but is
+  excluded from the digest because metric values change during normal traffic.
   """
   @spec digest(Jason.Encoder.t()) :: String.t()
   def digest(fingerprint) do
     fingerprint
+    |> without_metrics_snapshot()
     |> canonical_json()
     |> then(&:crypto.hash(:sha256, &1))
     |> Base.encode16(case: :lower)
   end
+
+  defp without_metrics_snapshot(fingerprint) when is_map(fingerprint) do
+    fingerprint
+    |> Map.delete("metrics_snapshot_t0")
+    |> Map.delete(:metrics_snapshot_t0)
+  end
+
+  defp without_metrics_snapshot(fingerprint), do: fingerprint
 
   defp order_objects(value) when is_map(value) do
     value
