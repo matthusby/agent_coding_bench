@@ -13,6 +13,12 @@ defmodule AgentCodingBench.Box do
   @callback scrape_metrics() :: {:ok, String.t()} | {:error, term()}
 
   @doc """
+  Returns the configured URL of the opencode server on the box.
+  """
+  @spec opencode_url() :: String.t()
+  def opencode_url, do: config!(:opencode_url)
+
+  @doc """
   Runs `command` on the configured box through OpenSSH.
 
   Options other than `:host` are passed to `System.cmd/3`.

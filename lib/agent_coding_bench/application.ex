@@ -13,6 +13,7 @@ defmodule AgentCodingBench.Application do
       {DNSCluster,
        query: Application.get_env(:agent_coding_bench, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: AgentCodingBench.PubSub},
+      {Registry, keys: :unique, name: AgentCodingBench.World.SessionRegistry},
       # Start a worker by calling: AgentCodingBench.Worker.start_link(arg)
       # {AgentCodingBench.Worker, arg},
       # Start to serve requests, typically the last entry

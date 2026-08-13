@@ -59,7 +59,10 @@ defmodule AgentCodingBench.MixProject do
        compile: false,
        depth: 1},
       {:swoosh, "~> 1.16"},
-      {:req, "~> 0.5"},
+      {:req, "~> 0.5.0"},
+      {:opencode_sdk, "== 0.1.88"},
+      # opencode_sdk ships a generator task in lib but marks its compiler dependency dev-only.
+      {:oapi_generator, "~> 0.4", runtime: false},
       {:telemetry_metrics, "~> 1.0"},
       {:telemetry_poller, "~> 1.0"},
       {:gettext, "~> 1.0"},
