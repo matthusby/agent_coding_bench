@@ -65,8 +65,17 @@ defmodule AgentCodingBench.World.LaneSupervisor do
       case Registry.lookup(registry, {:lane, lane}) do
         [{pid, _value}] ->
           case DynamicSupervisor.terminate_child(supervisor, pid) do
-            :ok -> {:cont, :ok}
-            {:error, reason} -> {:halt, {:error, reason}}
+            :ok ->
+              Phoenix.PubSub.broadcast(
+                AgentCodingBench.PubSub,
+                "world",
+                {:lane_removed, lane}
+              )
+
+              {:cont, :ok}
+
+            {:error, reason} ->
+              {:halt, {:error, reason}}
           end
 
         [] ->

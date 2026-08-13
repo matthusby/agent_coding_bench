@@ -23,6 +23,7 @@ config :agent_coding_bench, AgentCodingBenchWeb.Endpoint,
 # In test we don't send emails
 config :agent_coding_bench, AgentCodingBench.Mailer, adapter: Swoosh.Adapters.Test
 config :agent_coding_bench, :stats_box, AgentCodingBench.BoxFake
+config :agent_coding_bench, :world_runtime, AgentCodingBench.WorldRuntimeFake
 
 # Disable swoosh api client as it is only required for production adapters
 config :swoosh, :api_client, false

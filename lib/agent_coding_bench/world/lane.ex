@@ -101,7 +101,7 @@ defmodule AgentCodingBench.World.Lane do
     state = start_task_timer(state)
     {repo, repo_cycle} = RepoCycle.next(state.repo_cycle)
     clone_path = Clone.path(state.lane, clone_directory(repo), state.clone_root)
-    state = %{state | repo: repo, repo_cycle: repo_cycle, clone_path: clone_path}
+    state = announce(%{state | repo: repo, repo_cycle: repo_cycle, clone_path: clone_path})
     {:noreply, start_operation(state, :invent, fn -> invent_operation(state) end)}
   end
 
@@ -262,7 +262,7 @@ defmodule AgentCodingBench.World.Lane do
     }
 
     with {:ok, task} <- World.create_task(attrs),
-         state = %{state | task: task} |> start_task_timer() do
+         state = %{state | task: task} |> start_task_timer() |> announce() do
       {:ok,
        start_operation(state, :create_session, fn ->
          create_session_operation(state)
@@ -413,7 +413,7 @@ defmodule AgentCodingBench.World.Lane do
     announce(%{state | state: next_state, state_started_at: DateTime.utc_now()})
   end
 
-  defp touch_event(state), do: %{state | last_event_at: DateTime.utc_now()}
+  defp touch_event(state), do: announce(%{state | last_event_at: DateTime.utc_now()})
 
   defp restart_inactivity(state) do
     state = cancel_inactivity(state)

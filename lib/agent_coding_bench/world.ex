@@ -6,10 +6,12 @@ defmodule AgentCodingBench.World do
   import Ecto.Query, only: [from: 2]
 
   alias AgentCodingBench.Repo
+  alias AgentCodingBench.World.Lane
   alias AgentCodingBench.World.Task
   alias AgentCodingBench.World.TaskEvent
   alias AgentCodingBench.World.LaneSupervisor
   alias AgentCodingBench.World.RuntimeSupervisor
+  alias AgentCodingBench.World.SessionRegistry
   alias AgentCodingBench.World.Supervisor, as: WorldSupervisor
 
   @doc "Starts the World and its requested number of Lanes."
@@ -19,6 +21,7 @@ defmodule AgentCodingBench.World do
       {:ok, pid} ->
         case LaneSupervisor.scale(lane_count) do
           :ok ->
+            broadcast_world_status(true, lane_count)
             {:ok, pid}
 
           {:error, reason} ->
@@ -38,8 +41,28 @@ defmodule AgentCodingBench.World do
   @spec stop() :: :ok | {:error, :not_started}
   def stop do
     case Process.whereis(WorldSupervisor) do
-      nil -> {:error, :not_started}
-      pid -> DynamicSupervisor.terminate_child(RuntimeSupervisor, pid)
+      nil ->
+        {:error, :not_started}
+
+      pid ->
+        lanes = LaneSupervisor.lanes()
+
+        case DynamicSupervisor.terminate_child(RuntimeSupervisor, pid) do
+          :ok ->
+            Enum.each(lanes, fn lane ->
+              Phoenix.PubSub.broadcast(
+                AgentCodingBench.PubSub,
+                "world",
+                {:lane_removed, lane}
+              )
+            end)
+
+            broadcast_world_status(false, 0)
+            :ok
+
+          {:error, _reason} = error ->
+            error
+        end
     end
   end
 
@@ -47,7 +70,14 @@ defmodule AgentCodingBench.World do
   @spec scale_lanes(non_neg_integer()) :: :ok | {:error, :not_started | term()}
   def scale_lanes(lane_count) when is_integer(lane_count) and lane_count >= 0 do
     if Process.whereis(WorldSupervisor) do
-      LaneSupervisor.scale(lane_count)
+      case LaneSupervisor.scale(lane_count) do
+        :ok ->
+          broadcast_world_status(true, lane_count)
+          :ok
+
+        {:error, _reason} = error ->
+          error
+      end
     else
       {:error, :not_started}
     end
@@ -56,6 +86,21 @@ defmodule AgentCodingBench.World do
   @doc "Returns whether the ephemeral World supervisor is currently alive."
   @spec running?() :: boolean()
   def running?, do: Process.whereis(WorldSupervisor) != nil
+
+  @doc "Returns the current observable status of every registered Lane."
+  @spec lane_statuses() :: [Lane.status()]
+  def lane_statuses do
+    SessionRegistry
+    |> Registry.select([{{{:lane, :"$1"}, :"$2", :_}, [], [{{:"$1", :"$2"}}]}])
+    |> Enum.sort_by(&elem(&1, 0))
+    |> Enum.flat_map(fn {_lane, pid} ->
+      try do
+        [Lane.status(pid)]
+      catch
+        :exit, _reason -> []
+      end
+    end)
+  end
 
   @doc "Creates the running Task row immediately after invention."
   @spec create_task(map()) :: {:ok, Task.t()} | {:error, Ecto.Changeset.t()}
@@ -70,9 +115,32 @@ defmodule AgentCodingBench.World do
           {:ok, TaskEvent.t()} | {:error, Ecto.Changeset.t()}
   def record_event(%Task{} = task, kind, content)
       when is_atom(kind) and is_binary(content) do
-    task
-    |> TaskEvent.changeset(Atom.to_string(kind), content, DateTime.utc_now())
-    |> Repo.insert()
+    case task
+         |> TaskEvent.changeset(Atom.to_string(kind), content, DateTime.utc_now())
+         |> Repo.insert() do
+      {:ok, event} ->
+        Phoenix.PubSub.broadcast(
+          AgentCodingBench.PubSub,
+          "world",
+          {:task_event, %{event | task: task}}
+        )
+
+        {:ok, event}
+
+      {:error, changeset} ->
+        {:error, changeset}
+    end
+  end
+
+  @doc "Returns the latest Task events, newest first, with their Tasks loaded."
+  @spec recent_task_events(pos_integer()) :: [TaskEvent.t()]
+  def recent_task_events(limit \\ 50) when is_integer(limit) and limit > 0 do
+    Repo.all(
+      from event in TaskEvent,
+        order_by: [desc: event.at, desc: event.id],
+        limit: ^limit,
+        preload: :task
+    )
   end
 
   @doc "Returns a Task transcript in occurrence order."
@@ -114,6 +182,32 @@ defmodule AgentCodingBench.World do
     Repo.all(query)
   end
 
+  @doc "Returns filtered Task history, newest first."
+  @spec list_tasks(map()) :: [Task.t()]
+  def list_tasks(filters \\ %{}) when is_map(filters) do
+    Task
+    |> filter_tasks_by_lane(Map.get(filters, "lane"))
+    |> filter_tasks_by_repo(Map.get(filters, "world_repo"))
+    |> filter_tasks_by_outcome(Map.get(filters, "outcome"))
+    |> then(&from(task in &1, order_by: [desc: task.started_at, desc: task.id]))
+    |> Repo.all()
+  end
+
+  @doc "Returns the Lane and World Repo values present in Task history."
+  @spec task_filter_options() :: %{lanes: [non_neg_integer()], world_repos: [String.t()]}
+  def task_filter_options do
+    %{
+      lanes: Repo.all(from task in Task, distinct: true, order_by: task.lane, select: task.lane),
+      world_repos:
+        Repo.all(
+          from task in Task,
+            distinct: true,
+            order_by: task.world_repo,
+            select: task.world_repo
+        )
+    }
+  end
+
   @doc "Returns the ten latest Task titles for one Lane clone, oldest first."
   @spec recent_task_titles(non_neg_integer(), String.t()) :: [String.t()]
   def recent_task_titles(lane, world_repo)
@@ -126,6 +220,38 @@ defmodule AgentCodingBench.World do
         select: task.title
     )
     |> Enum.reverse()
+  end
+
+  defp filter_tasks_by_lane(query, lane) when is_binary(lane) do
+    case Integer.parse(lane) do
+      {lane_number, ""} when lane_number >= 0 ->
+        from task in query, where: task.lane == ^lane_number
+
+      _invalid ->
+        query
+    end
+  end
+
+  defp filter_tasks_by_lane(query, _lane), do: query
+
+  defp filter_tasks_by_repo(query, world_repo) when world_repo not in [nil, ""] do
+    from task in query, where: task.world_repo == ^world_repo
+  end
+
+  defp filter_tasks_by_repo(query, _world_repo), do: query
+
+  defp filter_tasks_by_outcome(query, outcome) when outcome in ~w(merged abandoned) do
+    from task in query, where: task.status == ^outcome
+  end
+
+  defp filter_tasks_by_outcome(query, _outcome), do: query
+
+  defp broadcast_world_status(running?, lane_count) do
+    Phoenix.PubSub.broadcast(
+      AgentCodingBench.PubSub,
+      "world",
+      {:world_status, %{running?: running?, lane_count: lane_count}}
+    )
   end
 
   defp finalize_task(task, status, reason) do

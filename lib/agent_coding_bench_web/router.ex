@@ -18,6 +18,7 @@ defmodule AgentCodingBenchWeb.Router do
     pipe_through :browser
 
     live "/", WorldLive
+    live "/tasks", TaskHistoryLive
   end
 
   # Other scopes may use custom stacks.

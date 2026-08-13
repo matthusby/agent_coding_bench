@@ -12,4 +12,9 @@ defmodule AgentCodingBench.LaneFake do
     send(Keyword.fetch!(opts, :test_pid), {:lane_started, Keyword.fetch!(opts, :lane), self()})
     {:ok, opts}
   end
+
+  @impl true
+  def handle_call(:status, _from, opts) do
+    {:reply, Keyword.fetch!(opts, :status), opts}
+  end
 end
