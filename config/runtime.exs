@@ -23,6 +23,11 @@ end
 config :agent_coding_bench, AgentCodingBenchWeb.Endpoint,
   http: [port: String.to_integer(System.get_env("PORT", "4000"))]
 
+config :agent_coding_bench, AgentCodingBench.Box,
+  host: System.get_env("BOX_HOST", "box"),
+  vllm_url: System.get_env("VLLM_URL", "http://localhost:8000"),
+  opencode_url: System.get_env("OPENCODE_URL", "http://localhost:4096")
+
 if config_env() == :prod do
   database_url =
     System.get_env("DATABASE_URL") ||
