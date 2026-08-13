@@ -36,6 +36,11 @@ A unit of work a PM invents for its lane's clone, carried end to end through
 implementation, review, and merge.
 _Avoid_: ticket, issue, story
 
+**Mirror**:
+The box-local bare copy of a World Repo, fetched from upstream once when the
+box is provisioned and never updated after. Clones are created from it.
+_Avoid_: bare repo, origin, cache
+
 **Collector**:
 The process that samples the vLLM metrics endpoint continuously while the
 world is up. Runs never touch it.
