@@ -40,5 +40,12 @@ defmodule AgentCodingBenchWeb.Router do
       live_dashboard "/dashboard", metrics: AgentCodingBenchWeb.Telemetry
       forward "/mailbox", Plug.Swoosh.MailboxPreview
     end
+
+    # Throwaway UI prototype (wayfinder #11) — dev only
+    scope "/prototype", AgentCodingBenchWeb do
+      pipe_through :browser
+
+      live "/run-compare", PrototypeRunCompareLive
+    end
   end
 end
