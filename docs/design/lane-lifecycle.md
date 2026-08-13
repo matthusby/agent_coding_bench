@@ -45,6 +45,7 @@ member. Triggers, from any state:
 | No SSE event from the coder session for the inactivity window | `inactivity_timeout` |
 | Per-task hard cap expires (invention through merge, spanning all rework cycles) | `task_timeout` |
 | PM/Reviewer/Person completion still failing after Req retries | `completion_failure` |
+| Lane process crash — swept to abandoned on restart (decided in [#8](https://github.com/matthusby/agent_coding_bench/issues/8)) | `lane_crash` |
 
 On abandon: `session_abort` the coder session if live, reset the clone,
 write the task row (`abandoned` + reason), back to inventing. Never retry

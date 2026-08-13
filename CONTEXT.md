@@ -59,8 +59,8 @@ not a state.
 
 **Abandon**:
 Mechanical termination of a task — session error, inactivity timeout,
-per-task hard cap, or persistent completion failure. Never a judgment call
-by any cast member; the clone resets and the PM invents fresh.
+per-task hard cap, persistent completion failure, or lane crash. Never a
+judgment call by any cast member; the clone resets and the PM invents fresh.
 _Avoid_: fail, cancel, reject
 
 ### The cast
