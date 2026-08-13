@@ -81,3 +81,9 @@ The agent playing the requesting human: answers when a coder asks a question,
 and rules on reviews — merge as-is, or back to the Coder for rework. Personas
 are generated dynamically; replies have no artificial delay.
 _Avoid_: human, user, stakeholder
+
+**Persona Card**:
+The Person's identity for one task — name, role, communication style, and a
+pickiness disposition — generated at task invention and discarded when the
+task ends. Every Person call in the task uses the same card.
+_Avoid_: profile, character
