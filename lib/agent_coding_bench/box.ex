@@ -19,6 +19,12 @@ defmodule AgentCodingBench.Box do
   def opencode_url, do: config!(:opencode_url)
 
   @doc """
+  Returns the configured URL of the vLLM server on the box.
+  """
+  @spec vllm_url() :: String.t()
+  def vllm_url, do: config!(:vllm_url)
+
+  @doc """
   Runs `command` on the configured box through OpenSSH.
 
   Options other than `:host` are passed to `System.cmd/3`.

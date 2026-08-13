@@ -5,9 +5,41 @@ defmodule AgentCodingBench.Stats do
 
   alias AgentCodingBench.Box
   alias AgentCodingBench.Repo
+  alias AgentCodingBench.Stats.Call
   alias AgentCodingBench.Stats.Run
 
   import Ecto.Query, only: [from: 2]
+
+  @doc "Records one client-observed unit of LLM work."
+  @spec record_call(map()) :: {:ok, Call.t()} | {:error, Ecto.Changeset.t()}
+  def record_call(
+        %{
+          at: at,
+          lane: lane,
+          role: role,
+          prompt_tokens: prompt_tokens,
+          completion_tokens: completion_tokens,
+          reasoning_tokens: reasoning_tokens,
+          cached_tokens: cached_tokens,
+          ttft_ms: ttft_ms,
+          duration_ms: duration_ms
+        } = attrs
+      ) do
+    %Call{
+      at: at,
+      lane: lane,
+      role: role,
+      task_id: Map.get(attrs, :task_id),
+      prompt_tokens: prompt_tokens,
+      completion_tokens: completion_tokens,
+      reasoning_tokens: reasoning_tokens,
+      cached_tokens: cached_tokens,
+      ttft_ms: ttft_ms,
+      duration_ms: duration_ms
+    }
+    |> Call.changeset()
+    |> Repo.insert()
+  end
 
   @doc """
   Returns the most recently started open Run, if one exists.

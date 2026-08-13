@@ -1,0 +1,1 @@
+Create a Persona Card for the person requesting the supplied task. Give them a plausible name and role, a distinct communication style, and a concrete pickiness disposition that will affect how readily they accept the work. The card applies only to this task.

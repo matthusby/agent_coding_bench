@@ -28,6 +28,9 @@ config :agent_coding_bench, AgentCodingBench.Box,
   vllm_url: System.get_env("VLLM_URL", "http://localhost:8000"),
   opencode_url: System.get_env("OPENCODE_URL", "http://localhost:4096")
 
+config :agent_coding_bench, AgentCodingBench.World.Cast,
+  diff_char_cap: String.to_integer(System.get_env("REVIEW_DIFF_CHAR_CAP", "60000"))
+
 if config_env() == :prod do
   database_url =
     System.get_env("DATABASE_URL") ||
