@@ -85,3 +85,13 @@ per the research:
 
 Stored as the raw jsonb tuple plus a SHA256 digest of the canonicalized
 tuple for cheap "same config?" comparison across Runs.
+
+Two fields are stored raw but normalized out of the digest, so that it tracks
+configuration rather than process identity:
+
+- the t0 `/metrics` snapshot, whose values move under normal traffic
+- the engine-init log line's `inference-1 | (EngineCore pid=N) INFO
+  <timestamp> [core.py:NNN]` prefix, which changes on every engine restart.
+  The pid and timestamp stay in storage — they are what tell you when the
+  engine last came up — but hashing them made a restarted, byte-identical
+  server read as a config change.

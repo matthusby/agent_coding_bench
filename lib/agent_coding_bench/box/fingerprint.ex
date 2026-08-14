@@ -12,7 +12,8 @@ defmodule AgentCodingBench.Box.Fingerprint do
   @env_command "docker inspect #{@container} --format '{{json .Config.Env}}'"
   @sha_check_command "cd #{@serving_repo} && sha256sum -c SHA256SUMS"
   @sha_digest_command "cd #{@serving_repo} && sha256sum SHA256SUMS"
-  @engine_command "cd #{@serving_repo} && docker compose logs inference 2>&1 | grep 'Initializing a V1 LLM engine' | tail -n 1"
+  @engine_marker "Initializing a V1 LLM engine"
+  @engine_command "cd #{@serving_repo} && docker compose logs inference 2>&1 | grep '#{@engine_marker}' | tail -n 1"
   @aiter_command "docker exec #{@container} python3 -c 'import importlib.metadata as metadata; print(metadata.version(\"amd-aiter\"))'"
 
   @doc """
@@ -86,11 +87,16 @@ defmodule AgentCodingBench.Box.Fingerprint do
 
   The raw t0 metrics snapshot remains part of the stored fingerprint, but is
   excluded from the digest because metric values change during normal traffic.
+
+  The engine config line keeps its raw log prefix in storage, where the pid and
+  timestamp say when the engine last started, but the prefix is dropped here so
+  that restarting an unchanged engine leaves the digest alone.
   """
   @spec digest(Jason.Encoder.t()) :: String.t()
   def digest(fingerprint) do
     fingerprint
     |> without_metrics_snapshot()
+    |> with_stable_engine_config_line()
     |> canonical_json()
     |> then(&:crypto.hash(:sha256, &1))
     |> Base.encode16(case: :lower)
@@ -103,6 +109,28 @@ defmodule AgentCodingBench.Box.Fingerprint do
   end
 
   defp without_metrics_snapshot(fingerprint), do: fingerprint
+
+  defp with_stable_engine_config_line(fingerprint) when is_map(fingerprint) do
+    Enum.reduce([:engine_config_line, "engine_config_line"], fingerprint, fn key, acc ->
+      case Map.fetch(acc, key) do
+        {:ok, line} when is_binary(line) -> Map.put(acc, key, stable_engine_config_line(line))
+        _ -> acc
+      end
+    end)
+  end
+
+  defp with_stable_engine_config_line(fingerprint), do: fingerprint
+
+  # Drops the "inference-1  | (EngineCore pid=345) INFO 08-14 01:03:28
+  # [core.py:121] " prefix. The pid and timestamp change on every engine
+  # restart; the rest of the prefix is either constant or already covered by
+  # the vllm_version field.
+  defp stable_engine_config_line(line) do
+    case String.split(line, @engine_marker, parts: 2) do
+      [_prefix, rest] -> @engine_marker <> rest
+      _ -> line
+    end
+  end
 
   defp order_objects(value) when is_map(value) do
     value

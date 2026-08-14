@@ -90,4 +90,32 @@ defmodule AgentCodingBench.Box.FingerprintTest do
     assert Fingerprint.digest(Map.put(stable_facts, "metrics_snapshot_t0", "counter 1")) ==
              Fingerprint.digest(Map.put(stable_facts, "metrics_snapshot_t0", "counter 2"))
   end
+
+  test "digest ignores the engine config line's pid and timestamp" do
+    stable_facts = %{"model" => "deepseek-v4"}
+    config = "Initializing a V1 LLM engine (v0.26.1) with config: model='deepseek-v4'"
+
+    before_restart =
+      "inference-1  | (EngineCore pid=345) INFO 08-14 01:03:28 [core.py:121] " <> config
+
+    after_restart =
+      "inference-1  | (EngineCore pid=90) INFO 08-14 03:43:41 [core.py:121] " <> config
+
+    assert Fingerprint.digest(Map.put(stable_facts, "engine_config_line", before_restart)) ==
+             Fingerprint.digest(Map.put(stable_facts, "engine_config_line", after_restart))
+  end
+
+  test "digest still tracks a real change to the engine config" do
+    stable_facts = %{"model" => "deepseek-v4"}
+    prefix = "inference-1  | (EngineCore pid=345) INFO 08-14 01:03:28 [core.py:121] "
+    engine = "Initializing a V1 LLM engine (v0.26.1) with config: max_seq_len="
+
+    digest_for = fn max_seq_len ->
+      stable_facts
+      |> Map.put("engine_config_line", prefix <> engine <> max_seq_len)
+      |> Fingerprint.digest()
+    end
+
+    refute digest_for.("262144") == digest_for.("131072")
+  end
 end
