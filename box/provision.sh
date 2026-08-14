@@ -93,6 +93,23 @@ verify_host_capacity() {
   docker info >/dev/null
 }
 
+disable_debugfs() {
+  step "Disabling debugfs"
+  # Reading /sys/kernel/debug/dri/*/amdgpu_evict_vram evicts every VRAM buffer
+  # object. Against a live vLLM the eviction never converges, so the GPU stalls
+  # and the reading process wedges unkillably inside the syscall. Bench agents
+  # run as root, so one `grep -r` from / is enough to trigger it. Nothing here
+  # needs debugfs: rocm-smi reads /sys/class/drm, and the serving container has
+  # no debugfs mount at all.
+  #
+  # Stop before masking: systemd unmounts the nested tracing mount in order,
+  # which a bare `umount -R` races and loses.
+  systemctl stop sys-kernel-debug-tracing.mount sys-kernel-debug.mount 2>/dev/null || true
+  systemctl mask sys-kernel-debug-tracing.mount sys-kernel-debug.mount
+  umount -R /sys/kernel/debug 2>/dev/null || true
+  ! mountpoint -q /sys/kernel/debug
+}
+
 install_mise() {
   if [[ -x "$MISE_BIN" ]] && [[ "$($MISE_BIN --version)" == *"$MISE_VERSION"* ]]; then
     return
@@ -272,6 +289,15 @@ ExecStart=${MISE_SHIMS}/opencode serve --hostname 127.0.0.1 --port 4096 --print-
 Restart=always
 RestartSec=2
 
+# Agents inherit this unit's mount namespace, so these cover every command they
+# spawn. debugfs is already unmounted host-wide; this keeps it unreachable even
+# if something remounts it. Agents never need the GPU devices directly - they
+# reach the model over HTTP on 127.0.0.1:8000 - so PrivateDevices takes away
+# /dev/kfd and /dev/dri. Note that read-only protections such as
+# ProtectKernelTunables would not help: the eviction is triggered by a read.
+InaccessiblePaths=/sys/kernel/debug
+PrivateDevices=yes
+
 [Install]
 WantedBy=multi-user.target
 EOF
@@ -341,6 +367,12 @@ warm_dependency_caches() {
 verify() {
   step "Verifying the provisioned box"
   curl -fsS http://127.0.0.1:8000/metrics >/dev/null
+  ! mountpoint -q /sys/kernel/debug
+  # Assert on the nodes themselves, not on a listing: InaccessiblePaths leaves
+  # an empty mode-000 directory, and root reads that happily.
+  systemd-run --quiet --pipe --wait --property=InaccessiblePaths=/sys/kernel/debug \
+    --property=PrivateDevices=yes \
+    /bin/sh -c '! test -e /sys/kernel/debug/dri && ! test -e /dev/kfd'
 
   local attempts=0
   until curl -fsS http://127.0.0.1:4096/doc >/dev/null; do
@@ -371,6 +403,7 @@ main() {
   require_root
   install_host_packages
   verify_host_capacity
+  disable_debugfs
   install_mise
   install_toolchains
   configure_git

@@ -30,7 +30,17 @@ needed because the bench uses SSH-only networking.
 - **opencode systemd unit** — `opencode serve --hostname 127.0.0.1 --port
   4096`, `Restart=always`. Loopback-only, **no auth**: ssh is the only way
   onto the box, so the rig carries zero secrets end to end. The EventRelay's
-  reconnect logic pairs with systemd's restart.
+  reconnect logic pairs with systemd's restart. The unit carries
+  `InaccessiblePaths=/sys/kernel/debug` and `PrivateDevices=yes`; agents
+  inherit its mount namespace, so both apply to every command they spawn.
+- **debugfs disabled** — `sys-kernel-debug.mount` is masked and unmounted.
+  Reading `/sys/kernel/debug/dri/*/amdgpu_evict_vram` evicts every VRAM buffer
+  object; against a live vLLM the eviction never converges, so the GPU drops to
+  roughly 1% of its throughput and the reading process wedges unkillably inside
+  the syscall. Agents run as root, so one `grep -r` from `/` reaches it.
+  Nothing in the stack needs debugfs — `rocm-smi` reads `/sys/class/drm`, and
+  the serving container has no debugfs mount. Read-only hardening such as
+  `ProtectKernelTunables` does not help, because the trigger is a read.
 - **`opencode.json`** — written by the script: the vLLM provider
   (`@ai-sdk/openai-compatible`, `baseURL: http://127.0.0.1:8000/v1`, model
   id = the served model name, `limit.context` matching `--max-model-len`),
