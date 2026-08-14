@@ -1,0 +1,11 @@
+[mcp_servers.tidewave]
+url = "http://localhost:9500/tidewave/mcp"
+
+[mcp_servers.tidewave.tools.browser_eval]
+approval_mode = "approve"
+
+[mcp_servers.tidewave.tools.project_eval]
+approval_mode = "approve"
+
+[mcp_servers.tidewave.tools.execute_sql_query]
+approval_mode = "approve"
