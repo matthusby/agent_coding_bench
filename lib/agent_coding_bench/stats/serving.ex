@@ -13,6 +13,8 @@ defmodule AgentCodingBench.Stats.Serving do
   @prefix_cache_queries "vllm:prefix_cache_queries_total"
   @running "vllm:num_requests_running"
   @waiting "vllm:num_requests_waiting"
+  @waiting_by_reason "vllm:num_requests_waiting_by_reason"
+  @preemptions "vllm:num_preemptions_total"
   @kv_cache "vllm:kv_cache_usage_perc"
   @prefill "vllm:request_prefill_time_seconds_bucket"
   @ttft "vllm:time_to_first_token_seconds_bucket"
@@ -25,6 +27,8 @@ defmodule AgentCodingBench.Stats.Serving do
     @prefix_cache_queries,
     @running,
     @waiting,
+    @waiting_by_reason,
+    @preemptions,
     @kv_cache,
     @prefill,
     @ttft,
@@ -56,6 +60,9 @@ defmodule AgentCodingBench.Stats.Serving do
         ),
       running: gauge_series(samples, @running, started_at, :sum, 1),
       waiting: gauge_series(samples, @waiting, started_at, :sum, 1),
+      waiting_capacity: waiting_reason_series(samples, "capacity", started_at),
+      waiting_deferred: waiting_reason_series(samples, "deferred", started_at),
+      preemptions: counter_total_series(samples, @preemptions, started_at),
       kv_cache: gauge_series(samples, @kv_cache, started_at, :average, 100),
       prefill_p50: histogram_quantile_series(samples, @prefill, started_at, 0.50, 1),
       prefill_p99: histogram_quantile_series(samples, @prefill, started_at, 0.99, 1),
@@ -120,6 +127,26 @@ defmodule AgentCodingBench.Stats.Serving do
       end)
     end)
     |> aggregate_at(:sum)
+  end
+
+  # vLLM splits the waiting queue by why each request is stuck: "capacity" is
+  # real backpressure, "deferred" is a transient constraint such as a KV
+  # transfer. The reasons sum to num_requests_waiting.
+  defp waiting_reason_series(samples, reason, started_at) do
+    samples
+    |> Enum.filter(&(&1.labels["reason"] == reason))
+    |> gauge_series(@waiting_by_reason, started_at, :sum, 1)
+  end
+
+  # Preemptions only matter as "how many happened during this window", so the
+  # per-scrape increases are accumulated rather than turned into a rate.
+  defp counter_total_series(samples, metric, started_at) do
+    samples
+    |> counter_delta_series(metric)
+    |> Enum.scan(fn point, running_total ->
+      %{point | value: point.value + running_total.value}
+    end)
+    |> align_to_window(started_at)
   end
 
   defp gauge_series(samples, metric, started_at, aggregation, multiplier) do

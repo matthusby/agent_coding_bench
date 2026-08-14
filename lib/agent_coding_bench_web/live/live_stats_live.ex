@@ -298,6 +298,34 @@ defmodule AgentCodingBenchWeb.LiveStatsLive do
                 ]}
               />
               <.metric_card
+                id="serving-queue-pressure"
+                class="xl:col-span-3"
+                title="Queue pressure"
+                value={last_value(@snapshot.serving.waiting_capacity)}
+                unit="capacity"
+                detail={
+                  "#{format_value(last_value(@snapshot.serving.waiting_deferred))} deferred · #{format_value(last_value(@snapshot.serving.preemptions))} preempted"
+                }
+                data-capacity={last_value(@snapshot.serving.waiting_capacity)}
+                data-deferred={last_value(@snapshot.serving.waiting_deferred)}
+                data-preemptions={last_value(@snapshot.serving.preemptions)}
+                max_seconds={@snapshot.window.seconds}
+                lines={[
+                  %{
+                    label: "capacity",
+                    color: "#f472b6",
+                    dashed?: false,
+                    points: @snapshot.serving.waiting_capacity
+                  },
+                  %{
+                    label: "deferred",
+                    color: "#2dd4bf",
+                    dashed?: true,
+                    points: @snapshot.serving.waiting_deferred
+                  }
+                ]}
+              />
+              <.metric_card
                 id="serving-kv-cache"
                 class="xl:col-span-3"
                 title="KV-cache usage"

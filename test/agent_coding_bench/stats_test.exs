@@ -112,6 +112,17 @@ defmodule AgentCodingBench.StatsTest do
     insert_sample(DateTime.add(now, -5, :second), "vllm:prefix_cache_queries_total", 1_500)
     insert_sample(DateTime.add(now, -5, :second), "vllm:num_requests_running", 3)
     insert_sample(DateTime.add(now, -5, :second), "vllm:num_requests_waiting", 2)
+
+    insert_sample(DateTime.add(now, -5, :second), "vllm:num_requests_waiting_by_reason", 2, %{
+      "reason" => "capacity"
+    })
+
+    insert_sample(DateTime.add(now, -5, :second), "vllm:num_requests_waiting_by_reason", 1, %{
+      "reason" => "deferred"
+    })
+
+    insert_sample(DateTime.add(now, -10, :second), "vllm:num_preemptions_total", 4)
+    insert_sample(DateTime.add(now, -5, :second), "vllm:num_preemptions_total", 7)
     insert_sample(DateTime.add(now, -5, :second), "vllm:kv_cache_usage_perc", 0.42)
     insert_sample(DateTime.add(now, -1_000, :second), "vllm:kv_cache_usage_perc", 0.99)
 
@@ -159,6 +170,9 @@ defmodule AgentCodingBench.StatsTest do
     assert_in_delta prefill_p99, 1.9, 0.0001
     assert List.last(snapshot.serving.running).value == 3.0
     assert List.last(snapshot.serving.waiting).value == 2.0
+    assert List.last(snapshot.serving.waiting_capacity).value == 2.0
+    assert List.last(snapshot.serving.waiting_deferred).value == 1.0
+    assert List.last(snapshot.serving.preemptions).value == 3.0
     assert List.last(snapshot.serving.kv_cache).value == 42.0
 
     assert snapshot.world == %{

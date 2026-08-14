@@ -29,6 +29,17 @@ defmodule AgentCodingBenchWeb.LiveStatsLiveTest do
     insert_sample(DateTime.add(now, -5, :second), "vllm:prefix_cache_queries_total", 150)
     insert_sample(DateTime.add(now, -5, :second), "vllm:num_requests_running", 3)
     insert_sample(DateTime.add(now, -5, :second), "vllm:num_requests_waiting", 2)
+
+    insert_sample(DateTime.add(now, -5, :second), "vllm:num_requests_waiting_by_reason", 2, %{
+      "reason" => "capacity"
+    })
+
+    insert_sample(DateTime.add(now, -5, :second), "vllm:num_requests_waiting_by_reason", 1, %{
+      "reason" => "deferred"
+    })
+
+    insert_sample(DateTime.add(now, -10, :second), "vllm:num_preemptions_total", 4)
+    insert_sample(DateTime.add(now, -5, :second), "vllm:num_preemptions_total", 7)
     insert_sample(DateTime.add(now, -5, :second), "vllm:kv_cache_usage_perc", 0.42)
 
     {:ok, view, _html} = live(conn, "/stats/live")
@@ -46,6 +57,11 @@ defmodule AgentCodingBenchWeb.LiveStatsLiveTest do
     assert has_element?(
              view,
              "#serving-requests[data-running='3.0'][data-waiting='2.0']"
+           )
+
+    assert has_element?(
+             view,
+             "#serving-queue-pressure[data-capacity='2.0'][data-deferred='1.0'][data-preemptions='3.0']"
            )
 
     assert has_element?(view, "#serving-kv-cache[data-value='42.0']")
@@ -101,11 +117,11 @@ defmodule AgentCodingBenchWeb.LiveStatsLiveTest do
     assert has_element?(view, "#live-active-run-empty")
   end
 
-  defp insert_sample(scraped_at, metric, value) do
+  defp insert_sample(scraped_at, metric, value, labels \\ %{}) do
     Repo.insert!(%Sample{
       scraped_at: scraped_at,
       metric: metric,
-      labels: %{},
+      labels: labels,
       value: value / 1
     })
   end
