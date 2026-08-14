@@ -236,6 +236,38 @@ defmodule AgentCodingBench.World.LaneTest do
     assert %{state: :coding} = Lane.status(lane)
   end
 
+  test "answers opencode v2 question events" do
+    lane = start_coding_task()
+
+    send(lane, {
+      :coder_event,
+      %{
+        "type" => "question.v2.asked",
+        "properties" => %{
+          "sessionID" => "session-44",
+          "id" => "question-2",
+          "questions" => [%{"question" => "Use the existing storage mechanism?"}]
+        }
+      }
+    })
+
+    reply_cast("Yes, keep the change local to the existing mechanism.")
+
+    assert_receive {:coder_request, :reply_question,
+                    ["question-2", [["Yes, keep the change local to the existing mechanism."]]],
+                    question_worker, question_ref}
+
+    send(question_worker, {:coder_reply, question_ref, {:ok, true}})
+    _ = :sys.get_state(lane)
+
+    task = Repo.one!(Task)
+
+    assert Enum.map(World.transcript(task), &{&1.kind, &1.content}) == [
+             {"question", "Use the existing storage mechanism?"},
+             {"answer", "Yes, keep the change local to the existing mechanism."}
+           ]
+  end
+
   test "Lane init sweeps a running Task left by its prior crashed process" do
     {:ok, crashed_task} =
       World.create_task(%{

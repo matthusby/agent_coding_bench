@@ -7,6 +7,7 @@ defmodule AgentCodingBench.Coder do
   """
 
   alias AgentCodingBench.Box
+  alias AgentCodingBench.Coder.Client
   alias OpenCode.Generated.Operations
 
   @typedoc "An opencode client scoped to one clone, or to the server event feed."
@@ -34,7 +35,9 @@ defmodule AgentCodingBench.Coder do
   @spec client(String.t() | nil, keyword()) :: client()
   def client(directory, opts \\ []) when is_binary(directory) or is_nil(directory) do
     base_url = Keyword.get(opts, :base_url, Box.opencode_url())
+
     OpenCode.create_client(base_url: base_url, directory: directory)
+    |> Keyword.put(:client, Client)
   end
 
   @doc "Creates a Coder session in the client's clone."
@@ -47,11 +50,15 @@ defmodule AgentCodingBench.Coder do
   @spec prompt_async(client(), String.t(), String.t()) :: :ok | {:error, term()}
   def prompt_async(client, session_id, prompt)
       when is_binary(session_id) and is_binary(prompt) do
-    Operations.session_prompt_async(
-      session_id,
-      %{parts: [%{type: "text", text: prompt}]},
-      client
-    )
+    case Operations.session_prompt_async(
+           session_id,
+           %{parts: [%{type: "text", text: prompt}]},
+           client
+         ) do
+      {:ok, _body} -> :ok
+      :ok -> :ok
+      {:error, _reason} = error -> error
+    end
   end
 
   @doc "Aborts an active Coder session."
@@ -77,8 +84,8 @@ defmodule AgentCodingBench.Coder do
   @doc "Subscribes to the server event feed."
   @spec event_stream(client()) :: result(Enumerable.t())
   def event_stream(client) do
-    case Operations.event_subscribe(client) do
-      {:ok, %{stream: stream}} -> {:ok, stream}
+    case Operations.global_event(client) do
+      {:ok, %{stream: stream}} -> {:ok, Stream.map(stream, &global_event_payload/1)}
       {:error, reason} -> {:error, reason}
       error -> {:error, error}
     end
@@ -91,4 +98,8 @@ defmodule AgentCodingBench.Coder do
   @doc "Lists permission requests that remain unanswered."
   @spec pending_permissions(client()) :: result([map()])
   def pending_permissions(client), do: Operations.permission_list(client)
+
+  defp global_event_payload(%{"payload" => payload}), do: payload
+  defp global_event_payload(%{payload: payload}), do: payload
+  defp global_event_payload(event), do: event
 end

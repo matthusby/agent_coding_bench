@@ -8,11 +8,11 @@ Builds on the vLLM metrics research
 
 ## Collection
 
-The **Collector** scrapes the vLLM `/metrics` endpoint (already exposed
-through Caddy) every **5 seconds**, continuously, whenever the world is up.
-Runs never touch it — starting or ending a Run changes nothing about
-collection. Data flows straight into Postgres on Matt's Mac, the durable
-home; the box stays ephemeral.
+The **Collector** scrapes the vLLM `/metrics` endpoint (published on box
+loopback by the socat sidecar and reached through the SSH forward) every **5
+seconds**, continuously, whenever the world is up. Runs never touch it —
+starting or ending a Run changes nothing about collection. Data flows straight
+into Postgres on Matt's Mac, the durable home; the box stays ephemeral.
 
 ## Samples
 

@@ -5,22 +5,25 @@ How a fresh AMD dev-cloud MI300X box becomes a ready world.
 
 ## Shape
 
-One idempotent bash script, `box/provision.sh`, living in this repo. Run it
-by scp'ing to the box and executing as root. Every step checks before it
-acts, so re-running is safe — though the normal move on a broken box is a
-fresh box.
+The operator creates a bare AMD Dev Cloud box and passes its IPv4 address to
+`bin/provision-box <ip>` on the Mac. The local helper updates a managed `Host
+box` block in `~/.ssh/config`, copies this repo's idempotent
+`box/provision.sh`, runs it as root, and opens the tunnels. Cloud creation and
+destruction stay manual; everything after the box has an IP is automated.
 
-**Layered on the serving stack.** The script assumes vLLM is already up per
-the serving repo's runbook (`~/dev/deepseek-v4-flash-mi300x`); it verifies
-that precondition and never manages, edits, or restarts anything the
-serving stack owns. In particular `compose.yaml` there is checksum-audited
-— the bench touches nothing checksummed.
+The remote script checks the MI300X host capacity, then clones the public
+serving repo at commit `7c06e57ee4c9cd6c4ba4d70e8a6422aa6d5562f0` into
+`/root/dev/deepseek-v4-flash-mi300x`. It downloads the digest-pinned image and
+model revision, verifies `SHA256SUMS`, and starts only the `inference` Compose
+service. It never edits the serving repo's checksum-audited files. Caddy is not
+needed because the bench uses SSH-only networking.
 
 ## What the script installs
 
-- **Toolchains** — `mise`, with pinned versions of Erlang/Elixir, Python,
-  and Node (the slate needs exactly these three). Versions live in the
-  script so a re-provisioned box is the same box.
+- **Toolchains** — checksum-verified `mise`, with pinned versions of
+  Erlang/Elixir, Python, and Node, plus the package managers required by the
+  current slate (Bun, uv, and Yarn). Versions live in the script so a
+  re-provisioned box is the same box.
 - **opencode** — pinned via `npm i -g opencode-ai@<version>`; the exact
   version is chosen at build time for compatibility with the
   `opencode_sdk` pin (0.1.88).
@@ -64,24 +67,24 @@ opening minutes measure vLLM, not package CDNs.
 
 ## Networking: ssh only
 
-Nothing public but sshd. The Mac's `~/.ssh/config` entry for the box (the
-same one `Box.exec` leans on) carries ControlMaster plus two
-`LocalForward`s: `8000 → 127.0.0.1:8000` (vLLM via the sidecar) and
-`4096 → 127.0.0.1:4096` (opencode). All `runtime.exs` URLs are
-`localhost`. Opening the tunnel is manual — `ssh -fN box` before starting
-the world; no autossh. Tunnel down means the world crash-loops until
-stopped, which is exactly the no-preflight behavior the architecture
-already accepts.
+The bench publishes no public services; the helper leaves unrelated
+pre-existing host services, including Caddy, unmanaged. Its own vLLM and
+opencode listeners bind box loopback. The managed `~/.ssh/config` entry carries
+ControlMaster plus two `LocalForward`s: `8000 → 127.0.0.1:8000` (vLLM via the
+sidecar) and `4096 → 127.0.0.1:4096` (opencode). All `runtime.exs` URLs are
+`localhost`. `bin/provision-box` opens the tunnel after remote verification; it
+is not kept alive by autossh. Tunnel down means the world crash-loops until
+stopped, which is the accepted no-preflight behavior.
 
 ## Verification
 
-The script ends with a verify step — the only verification anywhere:
+The remote script ends with a verify step:
 
 - vLLM `/metrics` answers on `127.0.0.1:8000` (sidecar + serving stack up)
 - opencode `GET /doc` answers on `127.0.0.1:4096` (unit running)
 - every mirror present and readable
 - each toolchain resolves via `mise exec`
 
-No app-side preflight and no separate mix task, per the architecture
-decision: discovery is `runtime.exs` config, and a world started against a
-dead box just crash-loops.
+The local helper then verifies both endpoints through the SSH forwards. There
+is still no app-side preflight and no separate Mix verification task: discovery
+is `runtime.exs` config, and a world started against a dead box crash-loops.

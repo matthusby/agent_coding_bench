@@ -19,6 +19,9 @@ defmodule AgentCodingBench.World.Lane do
   alias AgentCodingBench.World.SessionRegistry
   alias AgentCodingBench.World.Task
 
+  @question_event_types ["question.asked", "question.v2.asked"]
+  @pending_event_types ["session.idle", "permission.asked" | @question_event_types]
+
   @type status :: %{
           lane: non_neg_integer(),
           state: :inventing | :coding | :reviewing | :deciding,
@@ -129,8 +132,7 @@ defmodule AgentCodingBench.World.Lane do
         {:coder_event, %{"type" => type} = event},
         %{operation: operation} = state
       )
-      when type in ["session.idle", "question.asked", "permission.asked"] and
-             not is_nil(operation) do
+      when type in @pending_event_types and not is_nil(operation) do
     if current_session?(state, event["properties"]) do
       state =
         if state.state == :coding do
@@ -158,9 +160,10 @@ defmodule AgentCodingBench.World.Lane do
   end
 
   def handle_info(
-        {:coder_event, %{"type" => "question.asked", "properties" => properties}},
+        {:coder_event, %{"type" => type, "properties" => properties}},
         %{state: :coding} = state
-      ) do
+      )
+      when type in @question_event_types do
     if current_session?(state, properties) do
       state = state |> touch_event() |> restart_inactivity()
 

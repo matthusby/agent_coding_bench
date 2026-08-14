@@ -20,9 +20,9 @@ inventing ──task──▶ coding ──done──▶ reviewing ──review�
   clone to main, delete stray branches (self-heals after mid-task kills), cut
   the task branch.
 - **Coding** — the Coder's opencode session works the task branch. The Person
-  answering `question.asked` happens *inside* this state — replies are
-  instant chat completions, so a lane is never observably "waiting on a
-  human".
+  answering opencode question events (`question.asked` and
+  `question.v2.asked`) happens *inside* this state — replies are instant chat
+  completions, so a lane is never observably "waiting on a human".
 - **Reviewing** — a fresh Reviewer chat completion per pass (no memory of
   prior rounds) over the diff + task.
 - **Deciding** — the Person reads the review and rules:
