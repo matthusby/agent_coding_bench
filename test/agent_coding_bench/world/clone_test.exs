@@ -23,7 +23,9 @@ defmodule AgentCodingBench.World.CloneTest do
     assert ensure_command =~ "git clone '/root/world/mirrors/req.git' '/root/world/lanes/2/req'"
 
     assert_received {:exec, reset_command, [stderr_to_stdout: true]}
-    assert reset_command =~ "git -C '/root/world/lanes/2/req' switch"
+    # The switch has to discard: it runs before `reset --hard`, and a Coder
+    # killed mid-edit leaves changes a plain `git switch` refuses to overwrite.
+    assert reset_command =~ "git -C '/root/world/lanes/2/req' switch --discard-changes"
     assert reset_command =~ " reset --hard"
     assert reset_command =~ " clean -fd"
 

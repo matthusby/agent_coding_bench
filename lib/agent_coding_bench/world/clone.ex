@@ -120,8 +120,12 @@ defmodule AgentCodingBench.World.Clone do
   defp reset_command(clone_path) do
     path = shell_escape(clone_path)
 
+    # --discard-changes because the switch runs first: a plain `git switch`
+    # refuses to leave a dirty tree, so a Coder killed mid-edit - which every
+    # engine restart does - would abort the chain before `reset --hard` ever ran
+    # and wedge the Lane for good. Discarding is the whole point of a reset.
     base_assignment(path) <>
-      " && git -C #{path} switch \"$base\"" <>
+      " && git -C #{path} switch --discard-changes \"$base\"" <>
       " && git -C #{path} reset --hard \"$base\"" <>
       " && git -C #{path} clean -fd" <>
       " && for branch in $(git -C #{path} for-each-ref --format='%(refname:short)' refs/heads); do " <>
