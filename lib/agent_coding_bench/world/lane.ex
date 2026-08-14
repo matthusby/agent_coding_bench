@@ -9,10 +9,12 @@ defmodule AgentCodingBench.World.Lane do
   use GenServer, restart: :permanent
 
   alias AgentCodingBench.Coder
+  alias AgentCodingBench.Stats
   alias AgentCodingBench.World
   alias AgentCodingBench.World.Cast
   alias AgentCodingBench.World.Clone
   alias AgentCodingBench.World.CloneDigest
+  alias AgentCodingBench.World.CoderCall
   alias AgentCodingBench.World.CrashSweep
   alias AgentCodingBench.World.CrashSweeper
   alias AgentCodingBench.World.RepoCycle
@@ -82,6 +84,7 @@ defmodule AgentCodingBench.World.Lane do
       session_id: nil,
       operation: nil,
       pending_events: [],
+      recorded_turns: MapSet.new(),
       inactivity_timer: nil,
       inactivity_token: nil,
       task_timer: nil,
@@ -141,6 +144,26 @@ defmodule AgentCodingBench.World.Lane do
       ) do
     if current_session?(state, properties) do
       continue_after_abandon(touch_event(state), :session_error)
+    else
+      {:noreply, state}
+    end
+  end
+
+  # Recorded in every Lane state, not just :coding. A turn usually finishes just
+  # as the session goes idle, so gating on :coding would drop the last - and
+  # largest - turn of most tasks.
+  def handle_info(
+        {:coder_event, %{"type" => "message.updated", "properties" => properties}},
+        state
+      ) do
+    if current_session?(state, properties) do
+      state = record_coder_turn(state, properties)
+
+      if state.state == :coding do
+        {:noreply, state |> touch_event() |> restart_inactivity()}
+      else
+        {:noreply, state}
+      end
     else
       {:noreply, state}
     end
@@ -388,6 +411,30 @@ defmodule AgentCodingBench.World.Lane do
     end
   end
 
+  defp record_coder_turn(state, properties) do
+    with {:ok, %{id: turn_id} = turn} <- CoderCall.from_event(properties),
+         false <- MapSet.member?(state.recorded_turns, turn_id) do
+      _ =
+        Stats.record_call(%{
+          at: DateTime.utc_now(),
+          lane: state.lane,
+          role: "coder",
+          task_id: state.task && state.task.id,
+          prompt_tokens: turn.prompt_tokens,
+          completion_tokens: turn.completion_tokens,
+          reasoning_tokens: turn.reasoning_tokens,
+          cached_tokens: turn.cached_tokens,
+          # opencode reports no time to first token for a tool-loop turn.
+          ttft_ms: nil,
+          duration_ms: turn.duration_ms
+        })
+
+      %{state | recorded_turns: MapSet.put(state.recorded_turns, turn_id)}
+    else
+      _already_recorded_or_unfinished -> state
+    end
+  end
+
   defp continue_after_abandon(state, reason) do
     case abandon_result(state, reason) do
       {:ok, state} -> {:noreply, state, {:continue, :invent}}
@@ -418,6 +465,7 @@ defmodule AgentCodingBench.World.Lane do
       session_id: nil,
       review: nil,
       pending_events: [],
+      recorded_turns: MapSet.new(),
       last_abandon_reason: reason
     })
     |> transition(:inventing)

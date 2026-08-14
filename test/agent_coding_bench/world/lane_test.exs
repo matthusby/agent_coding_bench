@@ -3,6 +3,7 @@ defmodule AgentCodingBench.World.LaneTest do
 
   alias AgentCodingBench.CoderFake
   alias AgentCodingBench.LaneCastFake
+  alias AgentCodingBench.Stats.Call
   alias AgentCodingBench.World
   alias AgentCodingBench.World.Lane
   alias AgentCodingBench.World.Task
@@ -131,6 +132,44 @@ defmodule AgentCodingBench.World.LaneTest do
     task = Repo.one!(Task)
     assert task.status == "abandoned"
     assert task.abandon_reason == "task_timeout"
+  end
+
+  test "records one Coder Call per finished tool-loop turn" do
+    lane = start_coding_task()
+    turn = turn_event("session-44", "msg_01")
+
+    send(lane, {:coder_event, turn})
+    # opencode re-emits a finished turn; it must not be counted twice.
+    send(lane, {:coder_event, turn})
+    send(lane, {:coder_event, turn_event("session-44", "msg_02")})
+    _synchronize = Lane.status(lane)
+
+    assert [first, second] = Repo.all(from call in Call, order_by: call.id)
+    assert first.role == "coder"
+    assert first.lane == 2
+    assert first.task_id == Repo.one!(Task).id
+    assert first.prompt_tokens == 12_000
+    assert first.completion_tokens == 300
+    assert first.reasoning_tokens == 40
+    assert first.cached_tokens == 9_000
+    assert first.duration_ms == 3_500
+    assert first.ttft_ms == nil
+    assert second.role == "coder"
+  end
+
+  test "records a turn that finishes after the session goes idle" do
+    lane = start_coding_task()
+
+    send(lane, {:coder_event, idle_event("session-44")})
+    assert_receive {:cast_request, _messages, %{role: :reviewer}, _worker, _ref}
+    assert %{state: :reviewing} = Lane.status(lane)
+
+    # The largest turn of a task usually completes as the session goes idle, so
+    # recording must not be gated on the :coding state.
+    send(lane, {:coder_event, turn_event("session-44", "msg_final")})
+    _synchronize = Lane.status(lane)
+
+    assert [%Call{role: "coder", prompt_tokens: 12_000}] = Repo.all(Call)
   end
 
   test "hands the dealt size to the PM and records it on the Task" do
@@ -422,5 +461,28 @@ defmodule AgentCodingBench.World.LaneTest do
 
   defp idle_event(session_id) do
     %{"type" => "session.idle", "properties" => %{"sessionID" => session_id}}
+  end
+
+  # Shape taken from opencode's OpenAPI document: schemas EventMessageUpdated
+  # and AssistantMessage.
+  defp turn_event(session_id, message_id) do
+    %{
+      "type" => "message.updated",
+      "properties" => %{
+        "sessionID" => session_id,
+        "info" => %{
+          "id" => message_id,
+          "role" => "assistant",
+          "sessionID" => session_id,
+          "time" => %{"created" => 1_000, "completed" => 4_500},
+          "tokens" => %{
+            "input" => 12_000,
+            "output" => 300,
+            "reasoning" => 40,
+            "cache" => %{"read" => 9_000, "write" => 1_200}
+          }
+        }
+      }
+    }
   end
 end
