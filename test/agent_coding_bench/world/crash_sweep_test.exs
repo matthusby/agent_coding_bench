@@ -49,7 +49,8 @@ defmodule AgentCodingBench.World.CrashSweepTest do
       world_repo: "supabase/realtime",
       title: "Fix the reconnect backoff",
       description: "Backoff resets too eagerly after a dropped socket.",
-      persona_card: %{"name" => "bench"}
+      persona_card: %{"name" => "bench"},
+      size: "small"
     })
   end
 end

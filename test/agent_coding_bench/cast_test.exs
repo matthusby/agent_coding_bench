@@ -12,7 +12,8 @@ defmodule AgentCodingBench.CastTest do
         world_repo: "wojtekmach/req",
         title: "Test task",
         description: "Exercise one observed completion.",
-        persona_card: %{"name" => "Rina"}
+        persona_card: %{"name" => "Rina"},
+        size: "small"
       })
 
     %{task: task}

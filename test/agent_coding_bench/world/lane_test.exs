@@ -133,6 +133,57 @@ defmodule AgentCodingBench.World.LaneTest do
     assert task.abandon_reason == "task_timeout"
   end
 
+  test "hands the dealt size to the PM and records it on the Task" do
+    _lane = start_lane(size_weights: [large: 1])
+
+    assert_receive {:cast_request, pm_messages, %{role: :pm}, pm_worker, pm_ref}
+    pm_text = Enum.map_join(pm_messages, "\n", & &1.content)
+    assert pm_text =~ "Make this task large"
+    refute pm_text =~ "Keep this task small"
+
+    send(
+      pm_worker,
+      {:cast_reply, pm_ref,
+       {:ok,
+        Jason.encode!(%{
+          title: "Rework the retry pipeline",
+          description: "Thread retry budgets through every adapter."
+        })}}
+    )
+
+    reply_cast(
+      Jason.encode!(%{
+        name: "Rina Patel",
+        role: "maintainer",
+        communication_style: "brief",
+        pickiness: "actionable errors"
+      })
+    )
+
+    assert_receive {:coder_request, :create_session, [%{}], create_worker, create_ref}
+    send(create_worker, {:coder_reply, create_ref, {:ok, %{"id" => "session-44"}}})
+
+    assert %Task{size: "large"} = Repo.one!(Task)
+  end
+
+  test "caps a Task by its dealt size rather than the shared fallback" do
+    # The fallback is minutes away, so the cap can only fire if the per-size map
+    # was consulted.
+    lane =
+      start_coding_task(
+        size_weights: [large: 1],
+        task_timeouts: %{large: 25},
+        task_timeout: 60_000
+      )
+
+    assert_receive {:coder_request, :abort_session, ["session-44"], ^lane, abort_ref}, 1_000
+    send(lane, {:coder_reply, abort_ref, {:ok, true}})
+    assert_receive {:cast_request, _messages, %{role: :pm}, _worker, _ref}, 1_000
+
+    assert %Task{status: "abandoned", abandon_reason: "task_timeout", size: "large"} =
+             Repo.one!(Task)
+  end
+
   test "the hard cap interrupts a stalled Reviewer completion" do
     lane = start_coding_task(task_timeout: 100)
 
@@ -275,7 +326,8 @@ defmodule AgentCodingBench.World.LaneTest do
         world_repo: "req",
         title: "Interrupted task",
         description: "This process died mid-task.",
-        persona_card: %{"name" => "Rina"}
+        persona_card: %{"name" => "Rina"},
+        size: "small"
       })
 
     _lane = start_lane()
@@ -321,6 +373,9 @@ defmodule AgentCodingBench.World.LaneTest do
       crash_sweeper: false,
       inactivity_timeout: 60_000,
       task_timeout: 60_000,
+      # Pinned so tests that don't care about size stay deterministic; the
+      # size-specific tests override it.
+      size_weights: [small: 1],
       invention_retry_delay: 60_000,
       name: nil
     ]

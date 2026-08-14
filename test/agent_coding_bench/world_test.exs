@@ -11,7 +11,8 @@ defmodule AgentCodingBench.WorldTest do
                world_repo: "wojtekmach/req",
                title: "Expose retry diagnostics",
                description: "Make exhausted retries easier to diagnose.",
-               persona_card: %{"name" => "Rina", "role" => "maintainer"}
+               persona_card: %{"name" => "Rina", "role" => "maintainer"},
+               size: "small"
              })
 
     assert %Task{status: "running", finished_at: nil, abandon_reason: nil} = task
@@ -59,7 +60,8 @@ defmodule AgentCodingBench.WorldTest do
       world_repo: world_repo,
       title: title,
       description: "A self-contained task.",
-      persona_card: %{"name" => "Rina"}
+      persona_card: %{"name" => "Rina"},
+      size: "small"
     })
   end
 end

@@ -1,0 +1,1 @@
+Keep this task small: one focused change — a bug fix, a docs correction, or a tightly scoped addition — touching a file or two and finishable in a few minutes of coding. It must still be concrete enough to review from a diff.

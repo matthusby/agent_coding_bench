@@ -84,11 +84,24 @@ world_repos =
     )
   end)
 
+# Task size is dealt from a weighted slate so the load mix is a knob rather than
+# whatever the PM drifts to. Weights are slots per cycle, not percentages: the
+# defaults give ten small, seven medium, and three large tasks every twenty.
 config :agent_coding_bench, AgentCodingBench.World.Lane,
   repos: world_repos,
   clone_root: Path.join(world_root, "lanes"),
   inactivity_timeout: String.to_integer(System.get_env("LANE_INACTIVITY_TIMEOUT_MS", "600000")),
   task_timeout: String.to_integer(System.get_env("TASK_TIMEOUT_MS", "3600000")),
+  size_weights: [
+    small: String.to_integer(System.get_env("TASK_SIZE_WEIGHT_SMALL", "10")),
+    medium: String.to_integer(System.get_env("TASK_SIZE_WEIGHT_MEDIUM", "7")),
+    large: String.to_integer(System.get_env("TASK_SIZE_WEIGHT_LARGE", "3"))
+  ],
+  task_timeouts: %{
+    small: String.to_integer(System.get_env("TASK_TIMEOUT_SMALL_MS", "900000")),
+    medium: String.to_integer(System.get_env("TASK_TIMEOUT_MEDIUM_MS", "2700000")),
+    large: String.to_integer(System.get_env("TASK_TIMEOUT_LARGE_MS", "7200000"))
+  },
   invention_retry_delay: String.to_integer(System.get_env("INVENTION_RETRY_DELAY_MS", "5000"))
 
 if config_env() == :prod do

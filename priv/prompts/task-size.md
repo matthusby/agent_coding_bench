@@ -1,1 +1,0 @@
-Keep the task small-to-medium, self-contained, comfortably finishable inside one bounded coding session, and concrete enough to review from a diff. Vary the kind of work across feature, refactor, bug fix, and docs-adjacent tasks when the repository context supports it.

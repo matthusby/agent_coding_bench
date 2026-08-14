@@ -1,0 +1,1 @@
+Make this task large: substantial work — a cross-cutting feature, a subsystem refactor, or a change threading through several modules and their tests — taking an extended coding session with real exploration. It must still land as one reviewable diff. Do not split it into phases or prescribe a step-by-step plan.

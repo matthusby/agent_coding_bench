@@ -52,17 +52,23 @@ write the task row (`abandoned` + reason), back to inventing. Never retry
 the same task — a fresh PM-invented task is as good a load unit and avoids
 poison-task loops.
 
-Timeouts are config values, not constants. Defaults: inactivity 10 min,
-per-task hard cap 60 min — generous because the model under heavy
-concurrency is slow, not stuck.
+Timeouts are config values, not constants. Inactivity defaults to 10 min.
+The per-task hard cap is per size — 15 / 45 / 120 min for small / medium /
+large — because one shared cap either guillotines a large task or lets a
+stuck small one hold its lane for an hour. Caps are generous within a size
+because the model under heavy concurrency is slow, not stuck. A lane
+configured without the per-size map falls back to a single `task_timeout`.
 
 PM completion failure is the one non-abandoning failure: there's no task
 yet, so the lane just idles and retries invention.
 
 ## Task rows
 
-Every task ends in exactly one row: task, lane, World Repo, outcome
-(`merged` | `abandoned` + reason), timestamps. An operational log for "why
+Every task ends in exactly one row: task, lane, World Repo, dealt size,
+outcome (`merged` | `abandoned` + reason), timestamps. Size is stored so the
+realized duration mix can be compared against the configured weights, which
+is the only way to tell "the task was too big" from "the coder got stuck".
+Rows predating the size rotation leave it null. An operational log for "why
 is lane 3 weird" — not a headline metric (whether any of it surfaces as
 run metrics is [#6](https://github.com/matthusby/agent_coding_bench/issues/6)'s call).
 

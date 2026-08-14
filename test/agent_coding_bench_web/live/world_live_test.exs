@@ -202,7 +202,8 @@ defmodule AgentCodingBenchWeb.WorldLiveTest do
       world_repo: world_repo,
       title: title,
       description: "A focused task.",
-      persona_card: %{"name" => "Rina"}
+      persona_card: %{"name" => "Rina"},
+      size: "small"
     })
   end
 end

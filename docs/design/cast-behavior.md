@@ -17,11 +17,17 @@ role — no per-role sampling knobs.
   there, so it doubles as "what's been done"), and the last 10 task titles
   for this lane + clone from task rows — which catches *abandoned* tasks
   the commit log misses, so the PM doesn't reinvent a poison task.
-- **Task guidance**: small-to-medium, self-contained tasks (comfortably
-  inside the per-task hard cap under heavy concurrency), concrete enough to
-  review as a diff, varied in kind (feature / refactor / bugfix /
-  docs-adjacent). The size guidance is a config-level prompt fragment, so
-  calibration is a config edit, not a code change.
+- **Size is mechanical**, like the repo pick: each lane deals from a weighted
+  size slate (`small: 10, medium: 7, large: 3` by default), reshuffling each
+  cycle. Weights are whole slots per cycle rather than independent samples,
+  so a lane cannot draw six larges in a row and skew a short Run. The rig is
+  a load generator, and the spread of task sizes is the load mix — a knob it
+  sets, not a judgment the PM makes. The dealt size selects one of
+  `priv/prompts/task-size-{small,medium,large}.md`, sets the per-task hard
+  cap, and is stored on the task row so the realized mix can be checked
+  against the configured one.
+- **Task guidance**: self-contained work concrete enough to review as a
+  diff, varied in kind (feature / refactor / bugfix / docs-adjacent).
 - **Output contract**: structured `{title, description}`. Title goes into
   the task row and the repeat-avoidance list; description is handed
   verbatim to the Coder as the opening prompt of its opencode session, and
@@ -30,7 +36,10 @@ role — no per-role sampling knobs.
 - **Named fallback** (parked in the map's calibration fog, not built): if
   digest-blind invention produces degenerate tasks, move to a two-pass PM —
   first completion picks a handful of files to read, second invents with
-  their contents. Still plain completions, no tool loop.
+  their contents. Still plain completions, no tool loop. Most relevant to
+  the large bucket: the digest hides 60–80% of the file tree on the bigger
+  repos and every file's contents bar the README, which is thin ground for
+  inventing a cross-cutting change.
 
 ## Reviewer
 
