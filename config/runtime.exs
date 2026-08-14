@@ -21,7 +21,7 @@ if System.get_env("PHX_SERVER") do
 end
 
 config :agent_coding_bench, AgentCodingBenchWeb.Endpoint,
-  http: [port: String.to_integer(System.get_env("PORT", "4000"))]
+  http: [port: String.to_integer(System.get_env("PORT", "9500"))]
 
 config :agent_coding_bench, AgentCodingBench.Box,
   host: System.get_env("BOX_HOST", "box"),
