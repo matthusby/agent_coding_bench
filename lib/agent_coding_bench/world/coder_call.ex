@@ -34,14 +34,19 @@ defmodule AgentCodingBench.World.CoderCall do
        when is_binary(id) and is_integer(created) and is_integer(completed) do
     tokens = Map.get(info, "tokens") || %{}
     cache = Map.get(tokens, "cache") || %{}
+    cached = count(cache, "read")
 
     {:ok,
      %{
        id: id,
-       prompt_tokens: count(tokens, "input"),
+       # opencode reports `input` exclusive of cache reads, where the OpenAI
+       # `usage.prompt_tokens` behind every PM/Reviewer/Person row is inclusive.
+       # Summing keeps `prompt_tokens` meaning "the whole prompt" in every row,
+       # with `cached_tokens` a subset of it, so the two are comparable.
+       prompt_tokens: count(tokens, "input") + cached,
        completion_tokens: count(tokens, "output"),
        reasoning_tokens: count(tokens, "reasoning"),
-       cached_tokens: count(cache, "read"),
+       cached_tokens: cached,
        duration_ms: max(completed - created, 0)
      }}
   end

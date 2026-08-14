@@ -148,7 +148,7 @@ defmodule AgentCodingBench.World.LaneTest do
     assert first.role == "coder"
     assert first.lane == 2
     assert first.task_id == Repo.one!(Task).id
-    assert first.prompt_tokens == 12_000
+    assert first.prompt_tokens == 21_000
     assert first.completion_tokens == 300
     assert first.reasoning_tokens == 40
     assert first.cached_tokens == 9_000
@@ -169,7 +169,7 @@ defmodule AgentCodingBench.World.LaneTest do
     send(lane, {:coder_event, turn_event("session-44", "msg_final")})
     _synchronize = Lane.status(lane)
 
-    assert [%Call{role: "coder", prompt_tokens: 12_000}] = Repo.all(Call)
+    assert [%Call{role: "coder", prompt_tokens: 21_000}] = Repo.all(Call)
   end
 
   test "hands the dealt size to the PM and records it on the Task" do

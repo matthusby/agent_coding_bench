@@ -31,7 +31,10 @@ defmodule AgentCodingBench.World.CoderCallTest do
 
     assert turn == %{
              id: "msg_01",
-             prompt_tokens: 12_000,
+             # opencode's `input` excludes cache reads, so the whole prompt is
+             # 12_000 + 9_000. Every other role's `prompt_tokens` already counts
+             # its cached tokens, and the column has to mean one thing.
+             prompt_tokens: 21_000,
              completion_tokens: 300,
              reasoning_tokens: 40,
              cached_tokens: 9_000,

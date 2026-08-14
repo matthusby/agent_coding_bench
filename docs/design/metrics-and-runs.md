@@ -41,7 +41,11 @@ One row per **Call** — the client-observed unit of LLM work:
   `message.updated` / `session_messages`. Tokens from the message's
   `tokens` field (input / output / reasoning / cache.read — populated from
   vLLM's `usage` by opencode's OpenAI-compatible protocol; cache.write is
-  always 0 there). Duration from `time.created → time.completed`;
+  always 0 there). opencode reports `input` **exclusive** of `cache.read`,
+  unlike the `usage.prompt_tokens` behind every other role, so
+  `prompt_tokens` is stored as `input + cache.read`; the column means the
+  whole prompt in every row, with `cached_tokens` a subset of it.
+  Duration from `time.created → time.completed`;
   **`ttft_ms` is NULL** — serving-side TTFT histograms are the only TTFT
   source for Coder traffic.
 
