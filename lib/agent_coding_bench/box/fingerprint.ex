@@ -13,7 +13,7 @@ defmodule AgentCodingBench.Box.Fingerprint do
   @sha_check_command "cd #{@serving_repo} && sha256sum -c SHA256SUMS"
   @sha_digest_command "cd #{@serving_repo} && sha256sum SHA256SUMS"
   @engine_command "cd #{@serving_repo} && docker compose logs inference 2>&1 | grep 'Initializing a V1 LLM engine' | tail -n 1"
-  @aiter_command "docker exec #{@container} python3 -c 'import aiter; print(aiter.__version__)'"
+  @aiter_command "docker exec #{@container} python3 -c 'import importlib.metadata as metadata; print(metadata.version(\"amd-aiter\"))'"
 
   @doc """
   Collects the authoritative SSH and HTTP facts for the running vLLM server.

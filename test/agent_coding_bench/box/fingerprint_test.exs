@@ -3,6 +3,65 @@ defmodule AgentCodingBench.Box.FingerprintTest do
 
   alias AgentCodingBench.Box.Fingerprint
 
+  test "capture reads the AITER version from distribution metadata" do
+    exec = fn command, _opts ->
+      cond do
+        String.contains?(command, "docker image inspect") ->
+          {"example/image@sha256:digest\n", 0}
+
+        String.contains?(command, "{{json .Config.Cmd}}") ->
+          {~s(["--model","example"]), 0}
+
+        String.contains?(command, "{{json .Config.Env}}") ->
+          {~s(["VLLM_USE_V1=1"]), 0}
+
+        String.contains?(command, "sha256sum -c") ->
+          {"weights: OK\n", 0}
+
+        String.contains?(command, "sha256sum SHA256SUMS") ->
+          {String.duplicate("a", 64) <> "  SHA256SUMS\n", 0}
+
+        String.contains?(command, "Initializing a V1 LLM engine") ->
+          {"Initializing a V1 LLM engine with config: example\n", 0}
+
+        String.contains?(command, ~s|metadata.version("amd-aiter")|) ->
+          {"0.1.19\n", 0}
+
+        true ->
+          {"unexpected command: #{command}", 1}
+      end
+    end
+
+    request = fn opts ->
+      case {Keyword.fetch!(opts, :method), Keyword.fetch!(opts, :url)} do
+        {:get, "http://vllm.test/version"} ->
+          {:ok, %{status: 200, body: %{"version" => "0.10.1"}}}
+
+        {:get, "http://vllm.test/v1/models"} ->
+          {:ok,
+           %{
+             status: 200,
+             body: %{
+               "data" => [
+                 %{"id" => "example", "root" => "/models/example", "max_model_len" => 4096}
+               ]
+             }
+           }}
+
+        {:post, "http://vllm.test/v1/completions"} ->
+          {:ok, %{status: 200, body: %{"system_fingerprint" => "fp-example"}}}
+
+        {:get, "http://vllm.test/metrics"} ->
+          {:ok, %{status: 200, body: "vllm:num_requests_running 0\n"}}
+      end
+    end
+
+    assert {:ok, %{fingerprint: fingerprint}} =
+             Fingerprint.capture(exec, request, "http://vllm.test")
+
+    assert fingerprint["aiter_version"] == "0.1.19"
+  end
+
   test "canonical JSON sorts object keys recursively without reordering arrays" do
     fingerprint = %{
       "z" => 0,
