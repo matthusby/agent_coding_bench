@@ -20,15 +20,27 @@ defmodule AgentCodingBench.World.Cast do
           pickiness: String.t()
         }
 
-  @doc "Invents a task for the mechanically assigned World Repo and its Persona Card."
-  @spec invent_task(non_neg_integer(), String.t(), String.t(), keyword()) ::
+  @sizes [:small, :medium, :large]
+
+  @doc "Returns the task sizes the PM can be asked for."
+  @spec sizes() :: [atom()]
+  def sizes, do: @sizes
+
+  @doc """
+  Invents a task for the mechanically assigned World Repo and its Persona Card.
+
+  Both the World Repo and the size are assigned by the rig, so the PM shapes the
+  work but never picks how much of it there is.
+  """
+  @spec invent_task(non_neg_integer(), String.t(), String.t(), atom(), keyword()) ::
           {:ok, task_invention()} | {:error, term()}
-  def invent_task(lane, world_repo, digest, opts \\ [])
-      when is_integer(lane) and lane >= 0 and is_binary(world_repo) and is_binary(digest) do
+  def invent_task(lane, world_repo, digest, size, opts \\ [])
+      when is_integer(lane) and lane >= 0 and is_binary(world_repo) and is_binary(digest) and
+             size in @sizes do
     cast = Keyword.get(opts, :cast, Completion)
 
     pm_messages = [
-      %{role: "system", content: prompt!("pm.md") <> "\n\n" <> prompt!("task-size.md")},
+      %{role: "system", content: prompt!("pm.md") <> "\n\n" <> prompt!("task-size-#{size}.md")},
       %{
         role: "user",
         content: "World Repo: #{world_repo}\n\nClone digest:\n#{digest}"

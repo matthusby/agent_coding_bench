@@ -33,7 +33,9 @@ _Avoid_: checkout, workspace
 
 **Task**:
 A unit of work a PM invents for its lane's clone, carried end to end through
-implementation, review, and merge.
+implementation, review, and merge. Its size — `small`, `medium`, or `large` —
+is dealt mechanically from a weighted slate before invention, and sets both
+the PM's size instruction and the task's hard cap.
 _Avoid_: ticket, issue, story
 
 **Mirror**:

@@ -466,7 +466,8 @@ defmodule AgentCodingBench.StatsTest do
       world_repo: "wojtekmach/req",
       title: title,
       description: "A focused task.",
-      persona_card: %{"name" => "Rina"}
+      persona_card: %{"name" => "Rina"},
+      size: "small"
     })
   end
 

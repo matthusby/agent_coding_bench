@@ -17,6 +17,7 @@ defmodule AgentCodingBench.World.Lane do
   alias AgentCodingBench.World.CrashSweeper
   alias AgentCodingBench.World.RepoCycle
   alias AgentCodingBench.World.SessionRegistry
+  alias AgentCodingBench.World.SizeCycle
   alias AgentCodingBench.World.Task
 
   @question_event_types ["question.asked", "question.v2.asked"]
@@ -66,6 +67,9 @@ defmodule AgentCodingBench.World.Lane do
       crash_sweeper: Keyword.get(opts, :crash_sweeper, CrashSweeper),
       inactivity_timeout: Keyword.get(opts, :inactivity_timeout, 600_000),
       task_timeout: Keyword.get(opts, :task_timeout, 3_600_000),
+      task_timeouts: Keyword.get(opts, :task_timeouts, %{}),
+      size_cycle: SizeCycle.new(Keyword.get(opts, :size_weights, small: 10, medium: 7, large: 3)),
+      size: nil,
       invention_retry_delay: Keyword.get(opts, :invention_retry_delay, 5_000),
       state: :inventing,
       state_started_at: DateTime.utc_now(),
@@ -101,10 +105,24 @@ defmodule AgentCodingBench.World.Lane do
   end
 
   def handle_continue(:invent, state) do
-    state = start_task_timer(state)
     {repo, repo_cycle} = RepoCycle.next(state.repo_cycle)
+    {size, size_cycle} = SizeCycle.next(state.size_cycle)
     clone_path = Clone.path(state.lane, clone_directory(repo), state.clone_root)
-    state = announce(%{state | repo: repo, repo_cycle: repo_cycle, clone_path: clone_path})
+
+    # The size is drawn before the timer starts so the cap matches the amount of
+    # work being asked for, rather than one global cap guillotining a large task
+    # and letting a stuck small one hold the Lane for an hour.
+    state =
+      announce(%{
+        state
+        | repo: repo,
+          repo_cycle: repo_cycle,
+          size: size,
+          size_cycle: size_cycle,
+          clone_path: clone_path
+      })
+
+    state = start_task_timer(state)
     {:noreply, start_operation(state, :invent, fn -> invent_operation(state) end)}
   end
 
@@ -243,7 +261,7 @@ defmodule AgentCodingBench.World.Lane do
          titles = World.recent_task_titles(state.lane, state.repo.slug),
          {:ok, digest} <- CloneDigest.capture(state.clone_path, titles, exec: state.exec),
          {:ok, invention} <-
-           Cast.invent_task(state.lane, state.repo.slug, digest,
+           Cast.invent_task(state.lane, state.repo.slug, digest, state.size,
              cast: state.cast,
              cast_opts: state.cast_opts
            ) do
@@ -261,7 +279,8 @@ defmodule AgentCodingBench.World.Lane do
       world_repo: state.repo.slug,
       title: invention.title,
       description: invention.description,
-      persona_card: invention.persona_card
+      persona_card: invention.persona_card,
+      size: Atom.to_string(state.size)
     }
 
     with {:ok, task} <- World.create_task(attrs),
@@ -429,11 +448,17 @@ defmodule AgentCodingBench.World.Lane do
 
   defp start_task_timer(%{task_timer: nil} = state) do
     token = make_ref()
-    ref = Process.send_after(self(), {:task_timeout, token}, state.task_timeout)
+    ref = Process.send_after(self(), {:task_timeout, token}, task_timeout(state))
     %{state | task_timer: ref, task_token: token}
   end
 
   defp start_task_timer(state), do: state
+
+  # `task_timeout` stays the fallback so a Lane configured without a per-size map
+  # keeps one cap for every size.
+  defp task_timeout(state) do
+    Map.get(state.task_timeouts, state.size, state.task_timeout)
+  end
 
   defp cancel_inactivity(%{inactivity_timer: nil} = state), do: state
 

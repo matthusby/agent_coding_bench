@@ -21,7 +21,9 @@ defmodule AgentCodingBench.World.CastTest do
     ])
 
     assert {:ok, task} =
-             Cast.invent_task(2, "nimble_parsec", "## File tree\nlib/parser.ex", cast: CastFake)
+             Cast.invent_task(2, "nimble_parsec", "## File tree\nlib/parser.ex", :large,
+               cast: CastFake
+             )
 
     assert task.title == "Expose parser diagnostics"
     assert task.description =~ "line-aware diagnostics"
@@ -31,6 +33,9 @@ defmodule AgentCodingBench.World.CastTest do
     assert_received {:cast_completion, pm_messages, %{lane: 2, role: :pm}, pm_opts}
     assert messages_text(pm_messages) =~ "nimble_parsec"
     assert messages_text(pm_messages) =~ "lib/parser.ex"
+    # The assigned size, not a generic size instruction, reaches the PM.
+    assert messages_text(pm_messages) =~ "Make this task large"
+    refute messages_text(pm_messages) =~ "Keep this task small"
     assert pm_opts[:response_format]["type"] == "json_schema"
 
     assert_received {:cast_completion, persona_messages, %{lane: 2, role: :person}, persona_opts}

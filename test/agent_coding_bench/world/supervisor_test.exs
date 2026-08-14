@@ -14,7 +14,8 @@ defmodule AgentCodingBench.World.SupervisorTest do
         world_repo: "wojtekmach/req",
         title: "Interrupted task",
         description: "The app stopped mid-task.",
-        persona_card: %{"name" => "Rina"}
+        persona_card: %{"name" => "Rina"},
+        size: "small"
       })
 
     test_pid = self()
@@ -57,7 +58,8 @@ defmodule AgentCodingBench.World.SupervisorTest do
         world_repo: "wojtekmach/req",
         title: "Still interrupted",
         description: "Recovery must be retryable.",
-        persona_card: %{"name" => "Rina"}
+        persona_card: %{"name" => "Rina"},
+        size: "small"
       })
 
     repos = [
@@ -83,7 +85,8 @@ defmodule AgentCodingBench.World.SupervisorTest do
         world_repo: "wojtekmach/req",
         title: "Ordered recovery",
         description: "Lanes must wait for this cleanup.",
-        persona_card: %{"name" => "Rina"}
+        persona_card: %{"name" => "Rina"},
+        size: "small"
       })
 
     test_pid = self()

@@ -1,0 +1,1 @@
+Make this task medium-sized: a self-contained feature, refactor, or fix spanning several files within one subsystem, taking a sustained coding session to finish. The Coder should have to read the surrounding code before changing it. Keep it concrete enough to review from a diff.
