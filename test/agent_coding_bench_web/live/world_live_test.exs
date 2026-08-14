@@ -24,6 +24,7 @@ defmodule AgentCodingBenchWeb.WorldLiveTest do
     assert has_element?(view, "#run-form input[name='run[name]']")
     assert has_element?(view, "#run-form textarea[name='run[notes]']")
     assert has_element?(view, "#run-start")
+    assert has_element?(view, "#live-stats-link[href='/stats/live']")
   end
 
   test "starts and stops an idle World", %{conn: conn} do

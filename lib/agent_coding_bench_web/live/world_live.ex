@@ -572,6 +572,15 @@ defmodule AgentCodingBenchWeb.WorldLive do
             </div>
             <div class={["flex items-center gap-2"]}>
               <.link
+                navigate={~p"/stats/live"}
+                id="live-stats-link"
+                class={[
+                  "inline-flex items-center gap-2 rounded-lg border border-cyan-300/20 bg-cyan-300/5 px-3 py-2 text-xs font-semibold text-cyan-200 transition hover:-translate-y-0.5 hover:border-cyan-300/40 hover:bg-cyan-300/10"
+                ]}
+              >
+                Live stats <.icon name="hero-signal" class="size-3.5" />
+              </.link>
+              <.link
                 navigate={~p"/runs/compare"}
                 id="run-compare-link"
                 class={[

@@ -2,6 +2,7 @@ defmodule AgentCodingBench.StatsTest do
   use AgentCodingBench.DataCase, async: true
 
   alias AgentCodingBench.Stats
+  alias AgentCodingBench.Stats.Call
   alias AgentCodingBench.Stats.Run
   alias AgentCodingBench.Stats.Sample
   alias AgentCodingBench.BoxFake
@@ -41,6 +42,18 @@ defmodule AgentCodingBench.StatsTest do
     assert "another Run is already active" in errors_on(changeset).ended_at
   end
 
+  test "Run changes are broadcast to live stats subscribers" do
+    Phoenix.PubSub.subscribe(AgentCodingBench.PubSub, "stats")
+    BoxFake.put_fingerprint(%{"model" => "deepseek-v4"}, "digest-a")
+
+    assert {:ok, run} = Stats.start_run(%{name: "live", lane_count: 2}, box: BoxFake)
+    assert_receive {:run_status, %{active?: true, run_id: run_id}}
+    assert run_id == run.id
+
+    assert {:ok, _stopped_run} = Stats.stop_run(run, box: BoxFake)
+    assert_receive {:run_status, %{active?: false, run_id: ^run_id}}
+  end
+
   test "stop_run captures a new fingerprint and flags a changed digest" do
     BoxFake.put_fingerprint(%{"model" => "deepseek-v4"}, "digest-a")
     {:ok, run} = Stats.start_run(%{name: "load", lane_count: 4}, box: BoxFake)
@@ -72,6 +85,121 @@ defmodule AgentCodingBench.StatsTest do
 
     assert {:ok, stopped_run} = Stats.stop_run(run, box: BoxFake)
     refute stopped_run.fingerprint_mismatch
+  end
+
+  test "live_snapshot combines rolling serving and World activity with active Run totals" do
+    now = ~U[2026-08-13 12:15:00.000000Z]
+    run_started_at = DateTime.add(now, -600, :second)
+
+    Repo.insert!(%Run{
+      name: "live load",
+      started_at: run_started_at,
+      lane_count: 2,
+      fingerprint: %{"model" => "deepseek-v4"},
+      fingerprint_digest: "same",
+      tags: []
+    })
+
+    insert_sample(DateTime.add(now, -10, :second), "vllm:generation_tokens_total", 100)
+    insert_sample(DateTime.add(now, -5, :second), "vllm:generation_tokens_total", 150)
+    insert_sample(DateTime.add(now, -10, :second), "vllm:prompt_tokens_total", 1_000)
+    insert_sample(DateTime.add(now, -5, :second), "vllm:prompt_tokens_total", 1_500)
+    insert_sample(DateTime.add(now, -10, :second), "vllm:prompt_tokens_cached_total", 800)
+    insert_sample(DateTime.add(now, -5, :second), "vllm:prompt_tokens_cached_total", 1_250)
+    insert_sample(DateTime.add(now, -10, :second), "vllm:prefix_cache_hits_total", 700)
+    insert_sample(DateTime.add(now, -5, :second), "vllm:prefix_cache_hits_total", 1_100)
+    insert_sample(DateTime.add(now, -10, :second), "vllm:prefix_cache_queries_total", 1_000)
+    insert_sample(DateTime.add(now, -5, :second), "vllm:prefix_cache_queries_total", 1_500)
+    insert_sample(DateTime.add(now, -5, :second), "vllm:num_requests_running", 3)
+    insert_sample(DateTime.add(now, -5, :second), "vllm:num_requests_waiting", 2)
+    insert_sample(DateTime.add(now, -5, :second), "vllm:kv_cache_usage_perc", 0.42)
+    insert_sample(DateTime.add(now, -1_000, :second), "vllm:kv_cache_usage_perc", 0.99)
+
+    insert_snapshot_histogram(
+      now,
+      "vllm:request_prefill_time_seconds_bucket",
+      [0, 0, 0, 0, 0],
+      [1, 5, 9, 10, 10]
+    )
+
+    active = insert_snapshot_task("running", DateTime.add(now, -500, :second), nil)
+
+    merged =
+      insert_snapshot_task(
+        "merged",
+        DateTime.add(now, -450, :second),
+        DateTime.add(now, -300, :second)
+      )
+
+    _abandoned =
+      insert_snapshot_task(
+        "abandoned",
+        DateTime.add(now, -400, :second),
+        DateTime.add(now, -200, :second)
+      )
+
+    insert_snapshot_call("coder", active.id, DateTime.add(now, -30, :second))
+    insert_snapshot_call("pm", merged.id, DateTime.add(now, -120, :second))
+    insert_snapshot_call("reviewer", merged.id, DateTime.add(now, -1_000, :second))
+
+    snapshot =
+      Stats.live_snapshot(
+        now: now,
+        world_running?: true,
+        lane_statuses: [%{task_id: active.id}, %{task_id: nil}]
+      )
+
+    assert snapshot.latest_scrape_at == DateTime.add(now, -5, :second)
+    assert [%{offset_seconds: 895, value: 10.0}] = snapshot.serving.generation
+    assert [%{offset_seconds: 895, value: 100.0}] = snapshot.serving.prompt
+    assert [%{offset_seconds: 895, value: 90.0}] = snapshot.serving.prompt_cache_hit
+    assert [%{offset_seconds: 895, value: 80.0}] = snapshot.serving.prefix_cache_hit
+    assert [%{offset_seconds: 895, value: 0.5}] = snapshot.serving.prefill_p50
+    assert [%{offset_seconds: 895, value: prefill_p99}] = snapshot.serving.prefill_p99
+    assert_in_delta prefill_p99, 1.9, 0.0001
+    assert List.last(snapshot.serving.running).value == 3.0
+    assert List.last(snapshot.serving.waiting).value == 2.0
+    assert List.last(snapshot.serving.kv_cache).value == 42.0
+
+    assert snapshot.world == %{
+             active_tasks: 1,
+             abandoned: 1,
+             busy_lanes: 1,
+             calls_per_minute: 1,
+             completed: 1,
+             lane_count: 2,
+             role_mix: [
+               %{count: 1, role: "pm"},
+               %{count: 0, role: "reviewer"},
+               %{count: 0, role: "person"},
+               %{count: 1, role: "coder"}
+             ]
+           }
+
+    assert snapshot.active_run.name == "live load"
+    assert snapshot.active_run.elapsed_seconds == 600
+    assert snapshot.active_run.tasks_started == 3
+    assert snapshot.active_run.completed == 1
+    assert snapshot.active_run.abandoned == 1
+    assert snapshot.active_run.calls == 2
+  end
+
+  test "a stopped live snapshot preserves the final fifteen-minute window" do
+    last_scrape_at = ~U[2026-08-13 12:00:00.000000Z]
+    now = DateTime.add(last_scrape_at, 3_600, :second)
+
+    insert_sample(last_scrape_at, "vllm:kv_cache_usage_perc", 0.75)
+
+    snapshot =
+      Stats.live_snapshot(
+        now: now,
+        world_running?: false,
+        lane_statuses: []
+      )
+
+    assert snapshot.window.ended_at == last_scrape_at
+    assert snapshot.window.started_at == DateTime.add(last_scrape_at, -900, :second)
+    assert [%{offset_seconds: 900, value: 75.0}] = snapshot.serving.kv_cache
   end
 
   test "compare_runs aligns serving gauges and counter rates by offset from each Run start" do
@@ -235,6 +363,55 @@ defmodule AgentCodingBench.StatsTest do
       fingerprint_mismatch: false,
       tags: []
     })
+  end
+
+  defp insert_sample(scraped_at, metric, value, labels \\ %{}) do
+    Repo.insert!(%Sample{
+      scraped_at: scraped_at,
+      metric: metric,
+      labels: labels,
+      value: value / 1
+    })
+  end
+
+  defp insert_snapshot_task(status, started_at, finished_at) do
+    Repo.insert!(%Task{
+      lane: 1,
+      world_repo: "wojtekmach/req",
+      title: "Snapshot task",
+      description: "A focused task.",
+      persona_card: %{"name" => "Rina"},
+      status: status,
+      abandon_reason: if(status == "abandoned", do: "task_timeout"),
+      started_at: started_at,
+      finished_at: finished_at
+    })
+  end
+
+  defp insert_snapshot_call(role, task_id, at) do
+    Repo.insert!(%Call{
+      at: at,
+      lane: 1,
+      role: role,
+      task_id: task_id,
+      prompt_tokens: 100,
+      completion_tokens: 20,
+      reasoning_tokens: 5,
+      cached_tokens: 10,
+      duration_ms: 1_000
+    })
+  end
+
+  defp insert_snapshot_histogram(now, metric, previous_counts, current_counts) do
+    bounds = ["0.1", "0.5", "1", "2", "+Inf"]
+
+    for {at, counts} <- [
+          {DateTime.add(now, -10, :second), previous_counts},
+          {DateTime.add(now, -5, :second), current_counts}
+        ],
+        {bound, count} <- Enum.zip(bounds, counts) do
+      insert_sample(at, metric, count, %{"le" => bound, "model_name" => "deepseek-v4"})
+    end
   end
 
   defp insert_series(run, metric, values) do

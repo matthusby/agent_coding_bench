@@ -47,9 +47,18 @@ defmodule AgentCodingBench.Stats.Collector do
   end
 
   defp collect(state) do
+    scraped_at = DateTime.utc_now()
+
     with {:ok, exposition} <- state.box.scrape_metrics(),
-         {:ok, samples} <- Metrics.parse(exposition, DateTime.utc_now()) do
+         {:ok, samples} <- Metrics.parse(exposition, scraped_at) do
       {count, _rows} = Repo.insert_all(Sample, samples)
+
+      Phoenix.PubSub.broadcast(
+        AgentCodingBench.PubSub,
+        "stats",
+        {:stats_scraped, %{scraped_at: scraped_at, sample_count: count}}
+      )
+
       {:ok, count}
     end
   end

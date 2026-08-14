@@ -9,6 +9,8 @@ defmodule AgentCodingBench.Stats.CollectorTest do
   alias AgentCodingBench.Stats.Sample
 
   test "collector scrapes on start and persists only raw vLLM samples" do
+    Phoenix.PubSub.subscribe(AgentCodingBench.PubSub, "stats")
+
     collector =
       start_supervised!({Collector, name: nil, box: BoxFake, interval: 60_000})
 
@@ -19,5 +21,8 @@ defmodule AgentCodingBench.Stats.CollectorTest do
     assert sample.labels == %{"engine" => "0"}
     assert sample.value == 3.0
     assert %DateTime{} = sample.scraped_at
+
+    assert_receive {:stats_scraped, %{scraped_at: scraped_at, sample_count: 1}}
+    assert scraped_at == sample.scraped_at
   end
 end

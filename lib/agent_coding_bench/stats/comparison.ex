@@ -6,21 +6,13 @@ defmodule AgentCodingBench.Stats.Comparison do
   alias AgentCodingBench.Repo
   alias AgentCodingBench.Stats.Call
   alias AgentCodingBench.Stats.Run
-  alias AgentCodingBench.Stats.Sample
+  alias AgentCodingBench.Stats.Serving
   alias AgentCodingBench.World
-
-  @generation "vllm:generation_tokens_total"
-  @running "vllm:num_requests_running"
-  @waiting "vllm:num_requests_waiting"
-  @kv_cache "vllm:kv_cache_usage_perc"
-  @ttft "vllm:time_to_first_token_seconds_bucket"
-  @itl "vllm:inter_token_latency_seconds_bucket"
-  @serving_metrics [@generation, @running, @waiting, @kv_cache, @ttft, @itl]
 
   @spec build(Run.t(), Run.t()) :: map()
   def build(%Run{} = run_a, %Run{} = run_b) do
-    run_a_data = serving_data(run_a)
-    run_b_data = serving_data(run_b)
+    run_a_data = Serving.for_window(run_a.started_at, run_end(run_a))
+    run_b_data = Serving.for_window(run_b.started_at, run_end(run_b))
     workload_a = workload_data(run_a)
     workload_b = workload_data(run_b)
 
@@ -30,28 +22,6 @@ defmodule AgentCodingBench.Stats.Comparison do
       max_duration_seconds: max(duration_seconds(run_a), duration_seconds(run_b)),
       metrics: metric_rows(run_a_data, run_b_data),
       workload: workload_rows(workload_a, workload_b)
-    }
-  end
-
-  defp serving_data(run) do
-    samples =
-      Repo.all(
-        from sample in Sample,
-          where:
-            sample.scraped_at >= ^run.started_at and sample.scraped_at <= ^run_end(run) and
-              sample.metric in ^@serving_metrics,
-          order_by: [asc: sample.scraped_at]
-      )
-
-    %{
-      generation: counter_rate_series(samples, @generation, run),
-      running: gauge_series(samples, @running, run, :sum, 1),
-      waiting: gauge_series(samples, @waiting, run, :sum, 1),
-      kv_cache: gauge_series(samples, @kv_cache, run, :average, 100),
-      ttft_p50: histogram_quantile_series(samples, @ttft, run, 0.50, 1),
-      ttft_p99: histogram_quantile_series(samples, @ttft, run, 0.99, 1),
-      itl_p50: histogram_quantile_series(samples, @itl, run, 0.50, 1_000),
-      itl_p99: histogram_quantile_series(samples, @itl, run, 0.99, 1_000)
     }
   end
 
@@ -173,135 +143,6 @@ defmodule AgentCodingBench.Stats.Comparison do
     }
   end
 
-  defp counter_rate_series(samples, metric, run) do
-    samples
-    |> Enum.filter(&(&1.metric == metric))
-    |> Enum.group_by(& &1.labels)
-    |> Enum.flat_map(fn {_labels, series} ->
-      series
-      |> Enum.sort_by(& &1.scraped_at, DateTime)
-      |> Enum.chunk_every(2, 1, :discard)
-      |> Enum.flat_map(fn [previous, current] ->
-        elapsed = DateTime.diff(current.scraped_at, previous.scraped_at, :microsecond) / 1_000_000
-
-        if elapsed > 0 do
-          increase = counter_increase(previous.value, current.value)
-
-          [%{at: current.scraped_at, value: increase / elapsed}]
-        else
-          []
-        end
-      end)
-    end)
-    |> aggregate_at(:sum)
-    |> align_to_run(run)
-  end
-
-  defp gauge_series(samples, metric, run, aggregation, multiplier) do
-    samples
-    |> Enum.filter(&(&1.metric == metric))
-    |> Enum.map(&%{at: &1.scraped_at, value: &1.value * multiplier})
-    |> aggregate_at(aggregation)
-    |> align_to_run(run)
-  end
-
-  defp histogram_quantile_series(samples, metric, run, quantile, multiplier) do
-    samples
-    |> Enum.filter(&(&1.metric == metric))
-    |> Enum.group_by(&Map.delete(&1.labels, "le"))
-    |> Enum.flat_map(fn {_labels, family_samples} -> histogram_increases(family_samples) end)
-    |> Enum.group_by(& &1.at, & &1.buckets)
-    |> Enum.flat_map(fn {at, bucket_sets} ->
-      buckets =
-        Enum.reduce(bucket_sets, %{}, fn bucket_set, totals ->
-          Map.merge(totals, bucket_set, fn _bound, left, right -> left + right end)
-        end)
-
-      if Map.get(buckets, :infinity, 0.0) > 0 do
-        [%{at: at, value: histogram_quantile(buckets, quantile) * multiplier}]
-      else
-        []
-      end
-    end)
-    |> Enum.sort_by(& &1.at, DateTime)
-    |> align_to_run(run)
-  end
-
-  defp histogram_increases(samples) do
-    samples
-    |> Enum.group_by(& &1.scraped_at)
-    |> Enum.map(fn {at, snapshot_samples} ->
-      buckets = Map.new(snapshot_samples, &{parse_bound(&1.labels["le"]), &1.value})
-      %{at: at, buckets: buckets}
-    end)
-    |> Enum.sort_by(& &1.at, DateTime)
-    |> Enum.chunk_every(2, 1, :discard)
-    |> Enum.map(fn [previous, current] ->
-      buckets =
-        Map.new(current.buckets, fn {bound, current_count} ->
-          previous_count = Map.get(previous.buckets, bound, 0.0)
-
-          {bound, counter_increase(previous_count, current_count)}
-        end)
-
-      %{at: current.at, buckets: buckets}
-    end)
-  end
-
-  defp histogram_quantile(buckets, quantile) do
-    total = Map.get(buckets, :infinity, 0.0)
-    rank = quantile * total
-
-    buckets
-    |> Enum.reject(fn {bound, _count} -> bound == :infinity end)
-    |> Enum.sort_by(&elem(&1, 0))
-    |> interpolate_quantile(rank, 0.0, 0.0)
-  end
-
-  defp interpolate_quantile([], _rank, lower_bound, _lower_count), do: lower_bound
-
-  defp interpolate_quantile([{upper_bound, count} | rest], rank, lower_bound, lower_count) do
-    if count >= rank do
-      observations = count - lower_count
-
-      if observations > 0 do
-        lower_bound + (upper_bound - lower_bound) * (rank - lower_count) / observations
-      else
-        upper_bound
-      end
-    else
-      interpolate_quantile(rest, rank, upper_bound, count)
-    end
-  end
-
-  defp parse_bound("+Inf"), do: :infinity
-
-  defp parse_bound(bound) do
-    {value, ""} = Float.parse(bound)
-    value
-  end
-
-  defp aggregate_at(points, aggregation) do
-    points
-    |> Enum.group_by(& &1.at, & &1.value)
-    |> Enum.map(fn {at, values} ->
-      value =
-        case aggregation do
-          :sum -> Enum.sum(values)
-          :average -> Enum.sum(values) / length(values)
-        end
-
-      %{at: at, value: value}
-    end)
-    |> Enum.sort_by(& &1.at, DateTime)
-  end
-
-  defp align_to_run(points, run) do
-    Enum.map(points, fn point ->
-      %{offset_seconds: DateTime.diff(point.at, run.started_at), value: point.value}
-    end)
-  end
-
   defp config_match?(run_a, run_b) do
     run_a.fingerprint_digest == run_b.fingerprint_digest and not run_a.fingerprint_mismatch and
       not run_b.fingerprint_mismatch
@@ -310,9 +151,6 @@ defmodule AgentCodingBench.Stats.Comparison do
   defp duration_seconds(run), do: DateTime.diff(run_end(run), run.started_at)
   defp run_end(%Run{ended_at: nil}), do: DateTime.utc_now()
   defp run_end(%Run{ended_at: ended_at}), do: ended_at
-
-  defp counter_increase(previous, current) when current >= previous, do: current - previous
-  defp counter_increase(_previous, current), do: current
 
   defp steady(points), do: Enum.drop(points, div(length(points), 10))
 

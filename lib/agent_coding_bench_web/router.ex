@@ -19,6 +19,7 @@ defmodule AgentCodingBenchWeb.Router do
 
     live "/", WorldLive
     live "/tasks", TaskHistoryLive
+    live "/stats/live", LiveStatsLive
     live "/runs/compare", RunCompareLive
   end
 

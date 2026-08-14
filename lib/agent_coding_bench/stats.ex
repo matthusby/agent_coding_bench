@@ -7,6 +7,7 @@ defmodule AgentCodingBench.Stats do
   alias AgentCodingBench.Repo
   alias AgentCodingBench.Stats.Call
   alias AgentCodingBench.Stats.Comparison
+  alias AgentCodingBench.Stats.LiveSnapshot
   alias AgentCodingBench.Stats.Run
 
   import Ecto.Query, only: [from: 2]
@@ -61,6 +62,10 @@ defmodule AgentCodingBench.Stats do
     Repo.all(from run in Run, order_by: [desc: run.started_at])
   end
 
+  @doc "Builds the current fifteen-minute serving and World activity snapshot."
+  @spec live_snapshot(keyword()) :: map()
+  def live_snapshot(opts \\ []), do: LiveSnapshot.build(opts)
+
   @doc "Builds the serving and workload ledger for two Runs."
   @spec compare_runs!(pos_integer(), pos_integer()) :: map()
   def compare_runs!(run_a_id, run_b_id) do
@@ -74,10 +79,13 @@ defmodule AgentCodingBench.Stats do
   def start_run(attrs, opts \\ []) when is_map(attrs) do
     box = Keyword.get(opts, :box, configured_box())
 
-    with {:ok, capture} <- box.capture_fingerprint() do
-      %Run{}
-      |> Run.start_changeset(attrs, capture, DateTime.utc_now())
-      |> Repo.insert()
+    with {:ok, capture} <- box.capture_fingerprint(),
+         {:ok, run} <-
+           %Run{}
+           |> Run.start_changeset(attrs, capture, DateTime.utc_now())
+           |> Repo.insert() do
+      broadcast_run_status(run, true)
+      {:ok, run}
     end
   end
 
@@ -104,8 +112,12 @@ defmodule AgentCodingBench.Stats do
                fingerprint_mismatch: run.fingerprint_digest != capture.digest
              ]
            ) do
-        {1, [stopped_run]} -> {:ok, stopped_run}
-        {0, []} -> already_stopped_error(run)
+        {1, [stopped_run]} ->
+          broadcast_run_status(stopped_run, false)
+          {:ok, stopped_run}
+
+        {0, []} ->
+          already_stopped_error(run)
       end
     end
   end
@@ -116,6 +128,14 @@ defmodule AgentCodingBench.Stats do
 
   defp configured_box do
     Application.get_env(:agent_coding_bench, :stats_box, Box)
+  end
+
+  defp broadcast_run_status(run, active?) do
+    Phoenix.PubSub.broadcast(
+      AgentCodingBench.PubSub,
+      "stats",
+      {:run_status, %{active?: active?, run_id: run.id}}
+    )
   end
 
   defp already_stopped_error(run) do
