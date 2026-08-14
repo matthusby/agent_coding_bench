@@ -3,8 +3,8 @@ defmodule AgentCodingBench.Box.FingerprintTest do
 
   alias AgentCodingBench.Box.Fingerprint
 
-  test "capture reads the AITER version from distribution metadata" do
-    exec = fn command, _opts ->
+  defp exec(env_json \\ ~s(["VLLM_USE_V1=1"])) do
+    fn command, _opts ->
       cond do
         String.contains?(command, "docker image inspect") ->
           {"example/image@sha256:digest\n", 0}
@@ -13,7 +13,7 @@ defmodule AgentCodingBench.Box.FingerprintTest do
           {~s(["--model","example"]), 0}
 
         String.contains?(command, "{{json .Config.Env}}") ->
-          {~s(["VLLM_USE_V1=1"]), 0}
+          {env_json, 0}
 
         String.contains?(command, "sha256sum -c") ->
           {"weights: OK\n", 0}
@@ -31,8 +31,10 @@ defmodule AgentCodingBench.Box.FingerprintTest do
           {"unexpected command: #{command}", 1}
       end
     end
+  end
 
-    request = fn opts ->
+  defp request do
+    fn opts ->
       case {Keyword.fetch!(opts, :method), Keyword.fetch!(opts, :url)} do
         {:get, "http://vllm.test/version"} ->
           {:ok, %{status: 200, body: %{"version" => "0.10.1"}}}
@@ -55,11 +57,33 @@ defmodule AgentCodingBench.Box.FingerprintTest do
           {:ok, %{status: 200, body: "vllm:num_requests_running 0\n"}}
       end
     end
+  end
 
+  test "capture reads the AITER version from distribution metadata" do
     assert {:ok, %{fingerprint: fingerprint}} =
-             Fingerprint.capture(exec, request, "http://vllm.test")
+             Fingerprint.capture(exec(), request(), "http://vllm.test")
 
     assert fingerprint["aiter_version"] == "0.1.19"
+  end
+
+  test "capture keeps a container variable declared without a value" do
+    # Compose's `VAR: null` unsets the variable in the container, and Docker
+    # reports it as a bare name in `.Config.Env`. Refusing it here blocked every
+    # Run from starting once we unset HSA_COREDUMP_PATTERN on the box.
+    env_json = ~s(["VLLM_USE_V1=1","HSA_COREDUMP_PATTERN","EMPTY="])
+
+    assert {:ok, %{fingerprint: fingerprint}} =
+             Fingerprint.capture(exec(env_json), request(), "http://vllm.test")
+
+    # nil, "" and an absent key stay three distinguishable serving configs.
+    assert fingerprint["env"]["HSA_COREDUMP_PATTERN"] == nil
+    assert Map.has_key?(fingerprint["env"], "HSA_COREDUMP_PATTERN")
+    assert fingerprint["env"]["EMPTY"] == ""
+  end
+
+  test "capture still rejects a malformed container env entry" do
+    assert {:error, {:invalid_container_env, 42}} =
+             Fingerprint.capture(exec(~s([42])), request(), "http://vllm.test")
   end
 
   test "canonical JSON sorts object keys recursively without reordering arrays" do

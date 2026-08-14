@@ -87,11 +87,11 @@ defmodule AgentCodingBenchWeb.WorldLive do
              |> put_flash(:error, "Another Run was already started")}
         end
 
-      {:error, _reason} ->
+      {:error, reason} ->
         {:noreply,
          socket
          |> assign(:run_form, to_form(run_params, as: :run))
-         |> put_flash(:error, "Run could not be started")}
+         |> put_flash(:error, "Run could not be started: #{describe(reason)}")}
     end
   end
 
@@ -141,7 +141,7 @@ defmodule AgentCodingBenchWeb.WorldLive do
          |> assign(:run_form, run_form(nil))
          |> put_flash(:info, "Run stopped")}
 
-      {:error, _reason} ->
+      {:error, %Ecto.Changeset{}} ->
         active_run = Stats.active_run()
 
         {:noreply,
@@ -149,8 +149,18 @@ defmodule AgentCodingBenchWeb.WorldLive do
          |> assign(:active_run, active_run)
          |> assign(:run_form, run_form(active_run))
          |> put_flash(:error, "Run state changed elsewhere")}
+
+      {:error, reason} ->
+        {:noreply, put_flash(socket, :error, "Run could not be stopped: #{describe(reason)}")}
     end
   end
+
+  # A Run brackets a serving fingerprint, so starting or stopping one reaches the
+  # box over SSH and HTTP. Those failures arrive as opaque tuples, and rendering
+  # the reason is what makes them diagnosable from the page rather than only from
+  # the server log.
+  defp describe(reason),
+    do: reason |> inspect(limit: 5, printable_limit: 200) |> String.slice(0, 300)
 
   defp run_form(nil) do
     to_form(%{"name" => "", "notes" => ""}, as: :run)

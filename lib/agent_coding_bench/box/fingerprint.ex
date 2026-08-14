@@ -174,8 +174,19 @@ defmodule AgentCodingBench.Box.Fingerprint do
     Enum.reduce_while(entries, {:ok, %{}}, fn entry, {:ok, env} ->
       if is_binary(entry) do
         case String.split(entry, "=", parts: 2) do
-          [key, value] -> {:cont, {:ok, Map.put(env, key, value)}}
-          _ -> {:halt, {:error, {:invalid_container_env, entry}}}
+          [key, value] ->
+            {:cont, {:ok, Map.put(env, key, value)}}
+
+          # Docker records a variable declared without a value - Compose's
+          # `VAR: null`, which leaves it unset in the container - as a bare
+          # name. That is a real serving configuration, so it belongs in the
+          # fingerprint; `nil` keeps it distinct from both an absent key and an
+          # empty `VAR=`.
+          [key] when key != "" ->
+            {:cont, {:ok, Map.put(env, key, nil)}}
+
+          _ ->
+            {:halt, {:error, {:invalid_container_env, entry}}}
         end
       else
         {:halt, {:error, {:invalid_container_env, entry}}}
