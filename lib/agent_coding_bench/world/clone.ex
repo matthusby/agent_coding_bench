@@ -84,6 +84,23 @@ defmodule AgentCodingBench.World.Clone do
     reset_with(Keyword.get(opts, :exec, &Box.exec/2), clone_path)
   end
 
+  @doc """
+  Resets the clone when it exists, and succeeds quietly when it does not.
+
+  The box is disposable, so replacing it strands every running Task behind a Lane
+  directory that no longer exists. Crash recovery still has to abandon those
+  Tasks, and a bare `git -C` against a missing clone exits 128. Guarding inside
+  the one remote command keeps a genuinely unreachable box distinguishable: that
+  still fails, rather than looking like an absent clone.
+  """
+  @spec reset_if_present(String.t(), keyword()) :: :ok | {:error, term()}
+  def reset_if_present(clone_path, opts \\ []) when is_binary(clone_path) do
+    exec = Keyword.get(opts, :exec, &Box.exec/2)
+    git_dir = shell_escape(Path.join(clone_path, ".git"))
+
+    run(exec, :reset, "if [ -d #{git_dir} ]; then #{reset_command(clone_path)}; fi")
+  end
+
   defp ensure_clone(exec, clone_path, mirror_path) do
     path = shell_escape(clone_path)
     git_dir = shell_escape(Path.join(clone_path, ".git"))
@@ -97,17 +114,18 @@ defmodule AgentCodingBench.World.Clone do
   end
 
   defp reset_with(exec, clone_path) do
+    run(exec, :reset, reset_command(clone_path))
+  end
+
+  defp reset_command(clone_path) do
     path = shell_escape(clone_path)
 
-    command =
-      base_assignment(path) <>
-        " && git -C #{path} switch \"$base\"" <>
-        " && git -C #{path} reset --hard \"$base\"" <>
-        " && git -C #{path} clean -fd" <>
-        " && for branch in $(git -C #{path} for-each-ref --format='%(refname:short)' refs/heads); do " <>
-        "[ \"$branch\" = \"$base\" ] || git -C #{path} branch -D \"$branch\"; done"
-
-    run(exec, :reset, command)
+    base_assignment(path) <>
+      " && git -C #{path} switch \"$base\"" <>
+      " && git -C #{path} reset --hard \"$base\"" <>
+      " && git -C #{path} clean -fd" <>
+      " && for branch in $(git -C #{path} for-each-ref --format='%(refname:short)' refs/heads); do " <>
+      "[ \"$branch\" = \"$base\" ] || git -C #{path} branch -D \"$branch\"; done"
   end
 
   defp base_assignment(path) do

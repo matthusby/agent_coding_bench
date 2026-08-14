@@ -16,7 +16,7 @@ defmodule AgentCodingBench.World.CrashSweep do
         {:ok, repo} ->
           path = Clone.path(task.lane, Map.get(repo, :clone_directory, repo.slug), clone_root)
 
-          with :ok <- Clone.reset(path, exec: exec),
+          with :ok <- Clone.reset_if_present(path, exec: exec),
                {:ok, _task} <- World.abandon_task(task, :lane_crash) do
             {:cont, :ok}
           else
