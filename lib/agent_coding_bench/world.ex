@@ -193,6 +193,38 @@ defmodule AgentCodingBench.World do
     |> Repo.all()
   end
 
+  @doc "Returns Task workload for the cohort started inside an observation window."
+  @spec workload_for_window(DateTime.t(), DateTime.t()) :: %{
+          task_ids: [pos_integer()],
+          tasks_started: non_neg_integer(),
+          merged: non_neg_integer(),
+          abandoned: non_neg_integer(),
+          review_cycles: non_neg_integer()
+        }
+  def workload_for_window(%DateTime{} = started_at, %DateTime{} = ended_at) do
+    task_ids =
+      Repo.all(
+        from task in Task,
+          where: task.started_at >= ^started_at and task.started_at <= ^ended_at,
+          select: task.id
+      )
+
+    %{
+      task_ids: task_ids,
+      tasks_started: length(task_ids),
+      merged: task_outcome_count(task_ids, "merged", started_at, ended_at),
+      abandoned: task_outcome_count(task_ids, "abandoned", started_at, ended_at),
+      review_cycles:
+        Repo.one(
+          from event in TaskEvent,
+            where:
+              event.task_id in ^task_ids and event.kind == "review" and
+                event.at >= ^started_at and event.at <= ^ended_at,
+            select: count(event.id)
+        )
+    }
+  end
+
   @doc "Returns the Lane and World Repo values present in Task history."
   @spec task_filter_options() :: %{lanes: [non_neg_integer()], world_repos: [String.t()]}
   def task_filter_options do
@@ -245,6 +277,16 @@ defmodule AgentCodingBench.World do
   end
 
   defp filter_tasks_by_outcome(query, _outcome), do: query
+
+  defp task_outcome_count(task_ids, status, started_at, ended_at) do
+    Repo.one(
+      from task in Task,
+        where:
+          task.id in ^task_ids and task.status == ^status and task.finished_at >= ^started_at and
+            task.finished_at <= ^ended_at,
+        select: count(task.id)
+    )
+  end
 
   defp broadcast_world_status(running?, lane_count) do
     Phoenix.PubSub.broadcast(

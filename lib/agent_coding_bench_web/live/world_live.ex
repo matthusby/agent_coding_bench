@@ -570,15 +570,26 @@ defmodule AgentCodingBenchWeb.WorldLive do
               </p>
               <h2 class={["mt-1.5 text-xl font-semibold text-slate-100"]}>Recent events</h2>
             </div>
-            <.link
-              navigate={~p"/tasks"}
-              id="task-history-link"
-              class={[
-                "inline-flex items-center gap-2 rounded-lg border border-slate-800 bg-slate-900 px-3 py-2 text-xs font-semibold text-slate-300 transition hover:border-cyan-300/30 hover:text-cyan-200"
-              ]}
-            >
-              Task history <.icon name="hero-arrow-right" class="size-3.5" />
-            </.link>
+            <div class={["flex items-center gap-2"]}>
+              <.link
+                navigate={~p"/runs/compare"}
+                id="run-compare-link"
+                class={[
+                  "inline-flex items-center gap-2 rounded-lg border border-slate-800 bg-slate-900 px-3 py-2 text-xs font-semibold text-slate-300 transition hover:border-cyan-300/30 hover:text-cyan-200"
+                ]}
+              >
+                Compare Runs <.icon name="hero-arrows-right-left" class="size-3.5" />
+              </.link>
+              <.link
+                navigate={~p"/tasks"}
+                id="task-history-link"
+                class={[
+                  "inline-flex items-center gap-2 rounded-lg border border-slate-800 bg-slate-900 px-3 py-2 text-xs font-semibold text-slate-300 transition hover:border-cyan-300/30 hover:text-cyan-200"
+                ]}
+              >
+                Task history <.icon name="hero-arrow-right" class="size-3.5" />
+              </.link>
+            </div>
           </div>
 
           <div

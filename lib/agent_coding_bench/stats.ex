@@ -6,6 +6,7 @@ defmodule AgentCodingBench.Stats do
   alias AgentCodingBench.Box
   alias AgentCodingBench.Repo
   alias AgentCodingBench.Stats.Call
+  alias AgentCodingBench.Stats.Comparison
   alias AgentCodingBench.Stats.Run
 
   import Ecto.Query, only: [from: 2]
@@ -52,6 +53,18 @@ defmodule AgentCodingBench.Stats do
         order_by: [desc: run.started_at],
         limit: 1
     )
+  end
+
+  @doc "Lists Runs from newest to oldest for comparison controls."
+  @spec list_runs() :: [Run.t()]
+  def list_runs do
+    Repo.all(from run in Run, order_by: [desc: run.started_at])
+  end
+
+  @doc "Builds the serving and workload ledger for two Runs."
+  @spec compare_runs!(pos_integer(), pos_integer()) :: map()
+  def compare_runs!(run_a_id, run_b_id) do
+    Comparison.build(Repo.get!(Run, run_a_id), Repo.get!(Run, run_b_id))
   end
 
   @doc """

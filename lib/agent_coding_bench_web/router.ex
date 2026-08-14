@@ -19,6 +19,7 @@ defmodule AgentCodingBenchWeb.Router do
 
     live "/", WorldLive
     live "/tasks", TaskHistoryLive
+    live "/runs/compare", RunCompareLive
   end
 
   # Other scopes may use custom stacks.
