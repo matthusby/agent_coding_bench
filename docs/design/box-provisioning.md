@@ -83,7 +83,15 @@ opencode listeners bind box loopback. The managed `~/.ssh/config` entry carries
 ControlMaster plus two `LocalForward`s: `8000 → 127.0.0.1:8000` (vLLM via the
 sidecar) and `4096 → 127.0.0.1:4096` (opencode). All `runtime.exs` URLs are
 `localhost`. `bin/provision-box` opens the tunnel after remote verification; it
-is not kept alive by autossh. Tunnel down means the world crash-loops until
+is not kept alive by autossh.
+
+Provisioning itself runs over a second, forward-free multiplexed connection on
+its own control socket, closed before the tunnel opens. Fresh box images
+rate-limit inbound SSH — ufw's default `limit` rule on :22 rejects the 6th new
+connection in 30s, and fail2ban sits behind it — so a connection-per-step run
+locks itself out partway through, and the readiness probe backs off
+exponentially for the same reason. Two connections per provision, not one per
+step. Tunnel down means the world crash-loops until
 stopped, which is the accepted no-preflight behavior.
 
 ## Verification

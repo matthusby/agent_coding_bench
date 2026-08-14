@@ -37,15 +37,25 @@ defmodule AgentCodingBench.ProvisionBoxTest do
     assert commands =~ "ssh-keygen -R 203.0.113.43"
     provisioner = @helper |> Path.dirname() |> Path.join("../box/provision.sh") |> Path.expand()
 
-    assert commands =~
-             "scp -F #{ssh_config} -o ClearAllForwardings=yes -o ControlMaster=no -o ControlPath=none #{provisioner} box:/root/agent-coding-bench-provision.sh"
+    multiplexed =
+      "-o ClearAllForwardings=yes -o ControlMaster=auto " <>
+        "-o ControlPath=#{Path.join(root, "control-provision-%C")} -o ControlPersist=5m"
 
     assert commands =~
-             "ssh -F #{ssh_config} -o ClearAllForwardings=yes -o ControlMaster=no -o ControlPath=none box bash /root/agent-coding-bench-provision.sh"
+             "scp -F #{ssh_config} #{multiplexed} #{provisioner} box:/root/agent-coding-bench-provision.sh"
+
+    assert commands =~
+             "ssh -F #{ssh_config} #{multiplexed} box bash /root/agent-coding-bench-provision.sh"
 
     assert commands =~ "-fN -o ExitOnForwardFailure=yes box"
     assert commands =~ "curl --fail --silent --show-error http://127.0.0.1:8000/metrics"
     assert commands =~ "curl --fail --silent --show-error http://127.0.0.1:4096/doc"
+
+    # The provisioning socket closes before the tunnel opens, so the tunnel gets
+    # a master of its own that carries the LocalForwards.
+    {exit_at, _} = :binary.match(commands, "ssh -F #{ssh_config} #{multiplexed} -O exit box")
+    {tunnel_at, _} = :binary.match(commands, "-fN -o ExitOnForwardFailure=yes box")
+    assert exit_at < tunnel_at
   end
 
   test "rejects anything other than an IPv4 address" do

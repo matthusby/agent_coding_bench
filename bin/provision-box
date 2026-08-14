@@ -5,10 +5,16 @@ readonly MANAGED_BEGIN="# BEGIN agent_coding_bench box"
 readonly MANAGED_END="# END agent_coding_bench box"
 readonly SSH_CONFIG_FILE="${SSH_CONFIG_FILE:-${HOME}/.ssh/config}"
 readonly REMOTE_PROVISIONER="/root/agent-coding-bench-provision.sh"
-readonly -a SSH_NO_FORWARD_OPTIONS=(
+# Every provisioning step shares one multiplexed connection: sshd rate-limits
+# new connections (ufw's default limit rule on :22 rejects 6 in 30s), and a
+# step-per-connection run trips it. The socket is deliberately not the tunnel's
+# — this one carries no forwards, and it is closed before the tunnel opens.
+readonly PROVISION_CONTROL_PATH="$(dirname "$SSH_CONFIG_FILE")/control-provision-%C"
+readonly -a SSH_PROVISION_OPTIONS=(
   -o ClearAllForwardings=yes
-  -o ControlMaster=no
-  -o ControlPath=none
+  -o ControlMaster=auto
+  -o ControlPath="$PROVISION_CONTROL_PATH"
+  -o ControlPersist=5m
 )
 
 usage() {
@@ -46,6 +52,10 @@ stop_existing_tunnel() {
   if [[ -f "$SSH_CONFIG_FILE" ]] && grep -Fq "$MANAGED_BEGIN" "$SSH_CONFIG_FILE"; then
     ssh -F "$SSH_CONFIG_FILE" -O exit box >/dev/null 2>&1 || true
   fi
+}
+
+stop_provision_connection() {
+  ssh -F "$SSH_CONFIG_FILE" "${SSH_PROVISION_OPTIONS[@]}" -O exit box >/dev/null 2>&1 || true
 }
 
 write_ssh_config() {
@@ -90,15 +100,22 @@ EOF
   mv "$filtered_config" "$SSH_CONFIG_FILE"
 }
 
+# Backs off rather than polling at a fixed interval: each probe is a new
+# connection against a rate limit that only forgives with time, and the
+# successful one becomes the master every later step reuses.
 wait_for_ssh() {
-  local attempts=0
+  local -r timeout_seconds=300
+  local -r max_delay=30
+  local -r started=$SECONDS
+  local delay=2
 
   printf 'Waiting for SSH'
-  until ssh -F "$SSH_CONFIG_FILE" "${SSH_NO_FORWARD_OPTIONS[@]}" -o ConnectTimeout=10 box true >/dev/null 2>&1; do
-    attempts=$((attempts + 1))
-    ((attempts < 30)) || die "SSH did not become ready after 5 minutes"
+  until ssh -F "$SSH_CONFIG_FILE" "${SSH_PROVISION_OPTIONS[@]}" -o ConnectTimeout=10 box true >/dev/null 2>&1; do
+    ((SECONDS - started < timeout_seconds)) || die "SSH did not become ready after ${timeout_seconds}s"
     printf '.'
-    sleep 10
+    sleep "$delay"
+    delay=$((delay * 2))
+    ((delay <= max_delay)) || delay=$max_delay
   done
   printf ' ready\n'
 }
@@ -161,11 +178,12 @@ main() {
   wait_for_ssh
 
   printf 'Copying remote provisioner...\n'
-  scp -F "$SSH_CONFIG_FILE" "${SSH_NO_FORWARD_OPTIONS[@]}" "$provisioner" "box:$REMOTE_PROVISIONER"
+  scp -F "$SSH_CONFIG_FILE" "${SSH_PROVISION_OPTIONS[@]}" "$provisioner" "box:$REMOTE_PROVISIONER"
 
   printf 'Provisioning the box (model download and vLLM startup take several minutes)...\n'
-  ssh -F "$SSH_CONFIG_FILE" "${SSH_NO_FORWARD_OPTIONS[@]}" box "bash $REMOTE_PROVISIONER"
-  ssh -F "$SSH_CONFIG_FILE" "${SSH_NO_FORWARD_OPTIONS[@]}" box "rm -f $REMOTE_PROVISIONER"
+  ssh -F "$SSH_CONFIG_FILE" "${SSH_PROVISION_OPTIONS[@]}" box "bash $REMOTE_PROVISIONER"
+  ssh -F "$SSH_CONFIG_FILE" "${SSH_PROVISION_OPTIONS[@]}" box "rm -f $REMOTE_PROVISIONER"
+  stop_provision_connection
 
   port_available 8000
   port_available 4096
