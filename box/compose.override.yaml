@@ -1,0 +1,33 @@
+# Bench overrides for the pinned serving stack. Copied to
+# /root/dev/deepseek-v4-flash-mi300x/compose.override.yaml on the box; the
+# pinned, checksum-audited compose.yaml is never edited.
+#
+# Test windows (see docs/investigations/gpu-page-fault.md):
+#   window 1: HSA_XNACK=1, everything else baseline — do faults become retryable?
+#   window 2: BENCH_DISABLE_SPEC_DECODE=1 — does removing the DSpark path stop them?
+#   window 3: baseline again + HSA_COREDUMP_PATTERN=/var/crash/vllm/gpucore.%p
+#             for exactly ONE fault (23-minute wedge), then null it again.
+services:
+  inference:
+    environment:
+      # null keeps a fault a ~100s fail-and-restart instead of a 23-minute
+      # coredump wedge. Window 3 sets it to /var/crash/vllm/gpucore.%p once.
+      HSA_COREDUMP_PATTERN: null
+      # On a fatal memory fault, prints every faulting wavefront's PC and
+      # kernel name to stderr. Free until the fault fires; the coredump route
+      # proved a dead end (queues are torn down before the dump is written).
+      HSA_TOOLS_LIB: librocm-debug-agent.so.2
+      HSA_XNACK: "1"
+      BENCH_DISABLE_KV_OFFLOAD: "0"
+      BENCH_DISABLE_SPEC_DECODE: "0"
+    entrypoint: [/opt/bench-entrypoint.sh]
+    volumes:
+      - ./bench-entrypoint.sh:/opt/bench-entrypoint.sh:ro
+      # Root-cause fix: the pinned nightly's _zero_kv_blocks_kernel steps
+      # packed KV segments by page size instead of block stride, so zeroing a
+      # top block stores past the end of the KV pool (identified by the debug
+      # agent: MEMORY_VIOLATION at vllm/v1/worker/utils.py:90). This overlay is
+      # the pinned file plus upstream vLLM d6af803f43 (#50276, stride fix) and
+      # 79f3183f86 (#52058, DSV4 launch geometry), both merged after our
+      # pinned image was built.
+      - ./bench-worker-utils.zeroer-fix.py:/usr/local/lib/python3.12/dist-packages/vllm/v1/worker/utils.py:ro

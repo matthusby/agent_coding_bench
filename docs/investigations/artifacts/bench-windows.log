@@ -1,0 +1,20 @@
+window-1 start 2026-08-14T22:29:48Z config: xnack=1 spec=on offload=on coredump=off
+window-1 load-start 2026-08-14T22:33:18Z (13 running / 3 waiting, 16 lanes)
+window-1 fault 2026-08-14T22:42:02Z addr=0x79adfc200000 multi-XCD, xnack retried then no-retry
+window-2 load-start 2026-08-14T22:50:37Z config: xnack=1 spec=OFF offload=on coredump=off
+window-2 fault 2026-08-14T23:50:19Z addr=0x716a70a01000 spec=OFF — dspark refuted (~60min at half throughput)
+window-3 load-start 2026-08-15T00:00:34Z config: baseline (xnack=0 spec=on offload=on) + COREDUMP ARMED
+window-3 fault detected 2026-08-15T00:38:53Z
+window-3 dump complete 2026-08-15T00:40:53Z size=21G
+window-3 coredump disarmed, engine restarting 2026-08-15T00:42:56Z
+window-3b load-start 2026-08-15T00:54:51Z config: baseline + COREDUMP ARMED (fuser watcher)
+window-3b fault detected 2026-08-15T01:27:22Z
+window-3b dump complete 2026-08-15T01:51:25Z file=/root/dev/deepseek-v4-flash-mi300x/crash-dumps/gpucore.358 size=186G
+window-3b coredump disarmed, engine restarting 2026-08-15T01:53:29Z
+window-4 load-start 2026-08-15T02:13:18Z config: baseline + CLAMPED pa_mqa_logits overlay (fix soak)
+window-4 FAULT 2026-08-15T02:28:37Z addr=0x7b18c8800000 — clamp did NOT fix; reader misidentified or additional reader
+window-5 load-start 2026-08-15T02:48:15Z config: clamp kept + HSA_TOOLS_LIB debug agent armed
+window-5 lanes rescaled, true load-start 2026-08-15T02:50:08Z (14 running)
+window-5 RESULT: debug agent named _zero_kv_blocks_kernel (vllm/v1/worker/utils.py:90) STORE past pool end — upstream bug, fixed by d6af803f43+79f3183f86
+window-6 load-start 2026-08-15T03:06:52Z config: baseline + zeroer stride/geometry fix (debug agent still armed)
+window-6 scaled to 32 lanes 2026-08-15T03:14:46Z

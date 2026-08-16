@@ -1,0 +1,52 @@
+ROCm debug agent output at the window-5 fault (2026-08-15 02:53:37 UTC).
+Captured from `docker logs deepseek-v4-inference-1` during the session; the
+container was recreated for window 6 before this file was written, so this is
+the excerpt preserved from the live capture (first wavefront complete, second
+truncated). dmesg fault page at this instant: 0x0000768424800000 (pasid 546).
+Note wave s[0:1] = 0x768424800900 — the faulting store address, inside that page.
+
+--------------------------------------------------------
+wave_734345: pc=0x76ae0635d90c (kernel_code_entry=0x76ae0635d700 <_zero_kv_blocks_kernel>) (stopped, reason: MEMORY_VIOLATION)
+
+scalar registers:
+            s0: 24800900            s1: 00007684            s2: 24727d00            s3: 00007684
+            s4: 0003d2c0            s5: 00000000            s6: dc483c10            s7: 000076ad
+            s8: 00004df2            s9: 00000000           s10: 7c6e9700           s11: 0000767f
+           s12: 00000000           s13: 00000000           s14: 0008a7bc           s15: 00000000
+           s16: 00000031           s17: 00000000           s18: 00000049           s19: 00000000
+           s20: 161b0000           s21: 00007691           s22: 7ffffffe           s23: 00027000
+           s24: 00000009           s25: 0000006f           s26: 00000000           s27: 00000000
+           s28: ffffffff           s29: ffffffff           s30: ffffffff           s31: ffffffff
+
+system registers:
+          mode: 000003f0       trapsts: 90000100
+    xnack_mask: ffffffffffffffff  flat_scratch: 0000000000000000
+        status: 80410840
+
+general registers:
+            m0: 00001004
+            pc: 000076ae0635d90c          exec: ffffffffffffffff
+           vcc: ffffffffffffffff
+
+Disassembly for function _zero_kv_blocks_kernel:
+    code object: memory://358#offset=0x6d2e85a0&size=6448
+    loaded at: [0x76ae0635c000-0x76ae0635f000]
+
+/usr/local/lib/python3.12/dist-packages/vllm/v1/worker/utils.py:
+90          tl.store(ptr + offset + cols, tl.zeros([BLOCK_SIZE], dtype=tl.int32))
+    0x76ae0635d8f4 <+500>:    s_lshl_b64 s[2:3], s[2:3], 2
+    0x76ae0635d8f8 <+504>:    s_add_u32 s2, s10, s2
+    0x76ae0635d8fc <+508>:    s_addc_u32 s3, s11, s3
+    0x76ae0635d900 <+512>:    s_lshl_b64 s[0:1], s[0:1], 8
+    0x76ae0635d904 <+516>:    s_add_u32 s0, s2, s0
+    0x76ae0635d908 <+520>:    s_addc_u32 s1, s3, s1
+ => 0x76ae0635d90c <+524>:    global_store_dword v0, v1, s[0:1]
+
+75              return
+    0x76ae0635d914 <+532>:    s_endpgm
+
+End of disassembly.
+
+--------------------------------------------------------
+wave_734344: pc=0x76ae0635d90c (kernel_code_entry=0x76ae0635d700 <_zero_kv_blocks_kernel>) (stopped, reason: MEMORY_VIOLATION)
+[second wave identical in kernel/pc; scalar registers s0/s1 = 0x768424800100 — same page, earlier offset]
