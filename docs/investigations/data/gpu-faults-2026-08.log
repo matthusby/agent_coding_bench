@@ -1,0 +1,84 @@
+2026-08-17T01:09:42,559154+00:00 workqueue: copy_context_work_handler [amdgpu] hogged CPU for >10000us 4 times, consider switching to WQ_UNBOUND
+2026-08-17T01:12:15,589777+00:00 amdgpu 0000:83:00.0: renderD136 partition 7 not valid!
+2026-08-17T01:12:15,590265+00:00 amdgpu 0000:83:00.0: renderD135 partition 6 not valid!
+2026-08-17T01:12:15,590894+00:00 amdgpu 0000:83:00.0: renderD134 partition 5 not valid!
+2026-08-17T01:12:15,591431+00:00 amdgpu 0000:83:00.0: renderD133 partition 4 not valid!
+2026-08-17T01:12:15,592206+00:00 amdgpu 0000:83:00.0: renderD132 partition 3 not valid!
+2026-08-17T01:12:15,592693+00:00 amdgpu 0000:83:00.0: renderD131 partition 2 not valid!
+2026-08-17T01:12:15,593409+00:00 amdgpu 0000:83:00.0: renderD130 partition 1 not valid!
+2026-08-17T03:19:18,076175+00:00 amdgpu 0000:83:00.0: renderD136 partition 7 not valid!
+2026-08-17T03:19:18,076712+00:00 amdgpu 0000:83:00.0: renderD135 partition 6 not valid!
+2026-08-17T03:19:18,077841+00:00 amdgpu 0000:83:00.0: renderD134 partition 5 not valid!
+2026-08-17T03:19:18,078323+00:00 amdgpu 0000:83:00.0: renderD133 partition 4 not valid!
+2026-08-17T03:19:18,078975+00:00 amdgpu 0000:83:00.0: renderD132 partition 3 not valid!
+2026-08-17T03:19:18,079679+00:00 amdgpu 0000:83:00.0: renderD131 partition 2 not valid!
+2026-08-17T03:19:18,080320+00:00 amdgpu 0000:83:00.0: renderD130 partition 1 not valid!
+2026-08-17T03:56:47,768316+00:00 workqueue: copy_context_work_handler [amdgpu] hogged CPU for >10000us 8 times, consider switching to WQ_UNBOUND
+2026-08-17T11:34:30,031202+00:00 amdgpu 0000:83:00.0: renderD136 partition 7 not valid!
+2026-08-17T11:34:30,031754+00:00 amdgpu 0000:83:00.0: renderD135 partition 6 not valid!
+2026-08-17T11:34:30,033087+00:00 amdgpu 0000:83:00.0: renderD134 partition 5 not valid!
+2026-08-17T11:34:30,033536+00:00 amdgpu 0000:83:00.0: renderD133 partition 4 not valid!
+2026-08-17T11:34:30,034281+00:00 amdgpu 0000:83:00.0: renderD132 partition 3 not valid!
+2026-08-17T11:34:30,034724+00:00 amdgpu 0000:83:00.0: renderD131 partition 2 not valid!
+2026-08-17T11:34:30,035462+00:00 amdgpu 0000:83:00.0: renderD130 partition 1 not valid!
+2026-08-17T12:06:30,151818+00:00 workqueue: copy_context_work_handler [amdgpu] hogged CPU for >10000us 16 times, consider switching to WQ_UNBOUND
+2026-08-17T12:38:07,303714+00:00 amdgpu 0000:83:00.0: renderD136 partition 7 not valid!
+2026-08-17T12:38:07,304376+00:00 amdgpu 0000:83:00.0: renderD135 partition 6 not valid!
+2026-08-17T12:38:07,305184+00:00 amdgpu 0000:83:00.0: renderD134 partition 5 not valid!
+2026-08-17T12:38:07,306006+00:00 amdgpu 0000:83:00.0: renderD133 partition 4 not valid!
+2026-08-17T12:38:07,306612+00:00 amdgpu 0000:83:00.0: renderD132 partition 3 not valid!
+2026-08-17T12:38:07,307272+00:00 amdgpu 0000:83:00.0: renderD131 partition 2 not valid!
+2026-08-17T12:38:07,307962+00:00 amdgpu 0000:83:00.0: renderD130 partition 1 not valid!
+2026-08-17T13:24:51,367698+00:00 workqueue: copy_context_work_handler [amdgpu] hogged CPU for >10000us 32 times, consider switching to WQ_UNBOUND
+2026-08-17T14:27:34,176281+00:00 amdgpu 0000:83:00.0: [gfxhub0] retry page fault (src_id:0 ring:0 vmid:3 pasid:501)
+2026-08-17T14:27:34,176288+00:00 amdgpu 0000:83:00.0: [gfxhub0] no-retry page fault (src_id:0 ring:176 vmid:3 pasid:501)
+2026-08-17T14:27:34,177251+00:00 amdgpu 0000:83:00.0:  Process python3 pid 3395275 thread python3 pid 3395275
+2026-08-17T14:27:34,177675+00:00 amdgpu 0000:83:00.0:   in page starting at address 0x0000747f08a03000 from IH client 0x1b (UTCL2)
+2026-08-17T14:27:34,178192+00:00 amdgpu 0000:83:00.0:   cookie node_id 1 fault from die AID0.XCD0
+2026-08-17T14:27:34,178566+00:00 amdgpu 0000:83:00.0: [gfxhub0] no-retry page fault (src_id:0 ring:176 vmid:3 pasid:501)
+2026-08-17T14:27:34,179046+00:00 amdgpu 0000:83:00.0:  Process python3 pid 3395275 thread python3 pid 3395275
+2026-08-17T14:27:34,179471+00:00 amdgpu 0000:83:00.0:   in page starting at address 0x0000747f08a03000 from IH client 0x1b (UTCL2)
+2026-08-17T14:27:34,179991+00:00 amdgpu 0000:83:00.0:   cookie node_id 5 fault from die AID1.XCD0
+2026-08-17T14:27:34,180364+00:00 amdgpu 0000:83:00.0: [gfxhub0] no-retry page fault (src_id:0 ring:176 vmid:3 pasid:501)
+2026-08-17T14:27:34,180999+00:00 amdgpu 0000:83:00.0:  Process python3 pid 3395275 thread python3 pid 3395275
+2026-08-17T14:27:34,181551+00:00 amdgpu 0000:83:00.0:   in page starting at address 0x0000747f08a03000 from IH client 0x1b (UTCL2)
+2026-08-17T14:27:34,182181+00:00 amdgpu 0000:83:00.0:   cookie node_id 1 fault from die AID0.XCD0
+2026-08-17T14:27:34,182670+00:00 amdgpu 0000:83:00.0: [gfxhub0] no-retry page fault (src_id:0 ring:176 vmid:3 pasid:501)
+2026-08-17T14:27:34,183247+00:00 amdgpu 0000:83:00.0:  Process python3 pid 3395275 thread python3 pid 3395275
+2026-08-17T14:27:34,183777+00:00 amdgpu 0000:83:00.0:   in page starting at address 0x0000747f08a03000 from IH client 0x1b (UTCL2)
+2026-08-17T14:27:34,184478+00:00 amdgpu 0000:83:00.0:   cookie node_id 13 fault from die AID3.XCD0
+2026-08-17T14:27:34,185009+00:00 amdgpu 0000:83:00.0: [gfxhub0] no-retry page fault (src_id:0 ring:176 vmid:3 pasid:501)
+2026-08-17T14:27:34,185598+00:00 amdgpu 0000:83:00.0:  Process python3 pid 3395275 thread python3 pid 3395275
+2026-08-17T14:27:34,186218+00:00 amdgpu 0000:83:00.0:   in page starting at address 0x0000747f08a03000 from IH client 0x1b (UTCL2)
+2026-08-17T14:27:34,186950+00:00 amdgpu 0000:83:00.0:   cookie node_id 2 fault from die AID0.XCD1
+2026-08-17T14:27:34,187519+00:00 amdgpu 0000:83:00.0: [gfxhub0] no-retry page fault (src_id:0 ring:176 vmid:3 pasid:501)
+2026-08-17T14:27:34,188205+00:00 amdgpu 0000:83:00.0:  Process python3 pid 3395275 thread python3 pid 3395275
+2026-08-17T14:27:34,188832+00:00 amdgpu 0000:83:00.0:   in page starting at address 0x0000747f08a03000 from IH client 0x1b (UTCL2)
+2026-08-17T14:27:34,189557+00:00 amdgpu 0000:83:00.0:   cookie node_id 9 fault from die AID2.XCD0
+2026-08-17T14:27:34,190129+00:00 amdgpu 0000:83:00.0: [gfxhub0] no-retry page fault (src_id:0 ring:176 vmid:3 pasid:501)
+2026-08-17T14:27:34,190820+00:00 amdgpu 0000:83:00.0:  Process python3 pid 3395275 thread python3 pid 3395275
+2026-08-17T14:27:34,191457+00:00 amdgpu 0000:83:00.0:   in page starting at address 0x0000747f08a03000 from IH client 0x1b (UTCL2)
+2026-08-17T14:27:34,192199+00:00 amdgpu 0000:83:00.0:   cookie node_id 5 fault from die AID1.XCD0
+2026-08-17T14:27:34,192790+00:00 amdgpu 0000:83:00.0: [gfxhub0] no-retry page fault (src_id:0 ring:176 vmid:3 pasid:501)
+2026-08-17T14:27:34,193494+00:00 amdgpu 0000:83:00.0:  Process python3 pid 3395275 thread python3 pid 3395275
+2026-08-17T14:27:34,194152+00:00 amdgpu 0000:83:00.0:   in page starting at address 0x0000747f08a03000 from IH client 0x1b (UTCL2)
+2026-08-17T14:27:34,194921+00:00 amdgpu 0000:83:00.0:   cookie node_id 13 fault from die AID3.XCD0
+2026-08-17T14:27:34,195537+00:00 amdgpu 0000:83:00.0: [gfxhub0] no-retry page fault (src_id:0 ring:176 vmid:3 pasid:501)
+2026-08-17T14:27:34,196267+00:00 amdgpu 0000:83:00.0:  Process python3 pid 3395275 thread python3 pid 3395275
+2026-08-17T14:27:34,196905+00:00 amdgpu 0000:83:00.0:   in page starting at address 0x0000747f08a03000 from IH client 0x1b (UTCL2)
+2026-08-17T14:27:34,197623+00:00 amdgpu 0000:83:00.0:   cookie node_id 1 fault from die AID0.XCD0
+2026-08-17T14:27:34,198276+00:00 amdgpu 0000:83:00.0:  Process python3 pid 3395275 thread python3 pid 3395275
+2026-08-17T14:27:34,198954+00:00 amdgpu 0000:83:00.0:   in page starting at address 0x0000747f08a03000 from IH client 0x1b (UTCL2)
+2026-08-17T14:27:34,199777+00:00 amdgpu 0000:83:00.0:   cookie node_id 2 fault from die AID0.XCD1
+2026-08-17T14:50:42,905579+00:00 amdgpu 0000:83:00.0: renderD136 partition 7 not valid!
+2026-08-17T14:50:42,906807+00:00 amdgpu 0000:83:00.0: renderD135 partition 6 not valid!
+2026-08-17T14:50:42,908082+00:00 amdgpu 0000:83:00.0: renderD134 partition 5 not valid!
+2026-08-17T14:50:42,908980+00:00 amdgpu 0000:83:00.0: renderD133 partition 4 not valid!
+2026-08-17T14:50:42,909934+00:00 amdgpu 0000:83:00.0: renderD132 partition 3 not valid!
+2026-08-17T14:50:42,910859+00:00 amdgpu 0000:83:00.0: renderD131 partition 2 not valid!
+2026-08-17T14:50:42,911730+00:00 amdgpu 0000:83:00.0: renderD130 partition 1 not valid!
+2026-08-17T15:14:00,108200+00:00 workqueue: copy_context_work_handler [amdgpu] hogged CPU for >10000us 64 times, consider switching to WQ_UNBOUND
+2026-08-17T15:28:10,510240+00:00 workqueue: svm_range_restore_work [amdgpu] hogged CPU for >10000us 4 times, consider switching to WQ_UNBOUND
+2026-08-17T15:28:24,997427+00:00 workqueue: svm_range_restore_work [amdgpu] hogged CPU for >10000us 8 times, consider switching to WQ_UNBOUND
+2026-08-17T15:29:50,608534+00:00 workqueue: svm_range_restore_work [amdgpu] hogged CPU for >10000us 16 times, consider switching to WQ_UNBOUND
+2026-08-17T15:30:45,632250+00:00 workqueue: svm_range_restore_work [amdgpu] hogged CPU for >10000us 32 times, consider switching to WQ_UNBOUND
