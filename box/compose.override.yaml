@@ -17,9 +17,10 @@ services:
       # kernel name to stderr. Free until the fault fires; the coredump route
       # proved a dead end (queues are torn down before the dump is written).
       HSA_TOOLS_LIB: librocm-debug-agent.so.2
-      HSA_XNACK: "1"
       BENCH_DISABLE_KV_OFFLOAD: "0"
       BENCH_DISABLE_SPEC_DECODE: "0"
+      BENCH_MAX_NUM_BATCHED_TOKENS: "2688"
+      BENCH_LONG_PREFILL_TOKEN_THRESHOLD: "2688"
     entrypoint: [/opt/bench-entrypoint.sh]
     volumes:
       - ./bench-entrypoint.sh:/opt/bench-entrypoint.sh:ro
@@ -31,3 +32,8 @@ services:
       # 79f3183f86 (#52058, DSV4 launch geometry), both merged after our
       # pinned image was built.
       - ./bench-worker-utils.zeroer-fix.py:/usr/local/lib/python3.12/dist-packages/vllm/v1/worker/utils.py:ro
+      - ./bench-gemm-op-a8w8.m-round-up.py:/usr/local/lib/python3.12/dist-packages/aiter/ops/gemm_op_a8w8.py:ro
+      # Grid-tuned CSVs: pinned tables + 105 CK winners tuned on this GPU
+      # (87 blockscale Ms 4-1536 across 5 families, 18 bpreshuffle Ms 640-1536).
+      - ./tuning/dsv4-a8w8-blockscale-tuned-gemm.mi300x.grid-tuned.csv:/usr/local/lib/python3.12/dist-packages/aiter/configs/model_configs/dsv4_a8w8_blockscale_tuned_gemm.csv:ro
+      - ./tuning/dsv4-mi300x-a8w8-blockscale-bpreshuffle-ck.grid-tuned.csv:/opt/aiter-configs/dsv4-mi300x-a8w8-blockscale-bpreshuffle.csv:ro
