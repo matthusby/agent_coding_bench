@@ -76,6 +76,25 @@ EOF
 systemctl daemon-reload
 systemctl enable --now engine-log.service
 
+# The Runs ledger only scrapes vLLM metrics; this adds the host side (CPU,
+# container count, GPU busy/power) so engine-vs-box saturation is attributable.
+install -m 0755 "$SCRIPT_DIR/host-sampler.sh" /root/host-sampler.sh
+cat > /etc/systemd/system/host-sampler.service <<'EOF'
+[Unit]
+Description=Sample host and GPU load to /root/host-samples.csv
+After=docker.service
+
+[Service]
+ExecStart=/root/host-sampler.sh
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+EOF
+systemctl daemon-reload
+systemctl enable --now host-sampler.service
+
 # Recreate the engine under the override: pinned baseline (spec decode on,
 # KV offload on, XNACK off, coredump off) + zeroer fix + debug agent +
 # m2688 scheduler + AITER M round-up overlay + grid-tuned GEMM tables.
