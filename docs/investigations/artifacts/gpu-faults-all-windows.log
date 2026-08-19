@@ -1,0 +1,315 @@
+===== /root/gpu-faults.window1.log
+2026-08-14T22:42:02,372888+00:00 amdgpu 0000:83:00.0: [gfxhub0] retry page fault (src_id:0 ring:0 vmid:3 pasid:102)
+2026-08-14T22:42:02,373478+00:00 amdgpu 0000:83:00.0: [gfxhub0] no-retry page fault (src_id:0 ring:160 vmid:3 pasid:102)
+2026-08-14T22:42:02,373480+00:00 amdgpu 0000:83:00.0:  Process VLLM::EngineCor pid 12399 thread VLLM::EngineCor pid 12399
+2026-08-14T22:42:02,373482+00:00 amdgpu 0000:83:00.0:   in page starting at address 0x000079adfc200000 from IH client 0x1b (UTCL2)
+2026-08-14T22:42:02,373484+00:00 amdgpu 0000:83:00.0:   cookie node_id 13 fault from die AID3.XCD0
+2026-08-14T22:42:02,373487+00:00 amdgpu 0000:83:00.0: [gfxhub0] no-retry page fault (src_id:0 ring:160 vmid:3 pasid:102)
+2026-08-14T22:42:02,373488+00:00 amdgpu 0000:83:00.0:  Process VLLM::EngineCor pid 12399 thread VLLM::EngineCor pid 12399
+2026-08-14T22:42:02,373489+00:00 amdgpu 0000:83:00.0:   in page starting at address 0x000079adfc200000 from IH client 0x1b (UTCL2)
+2026-08-14T22:42:02,373490+00:00 amdgpu 0000:83:00.0:   cookie node_id 13 fault from die AID3.XCD0
+2026-08-14T22:42:02,373491+00:00 amdgpu 0000:83:00.0: [gfxhub0] no-retry page fault (src_id:0 ring:160 vmid:3 pasid:102)
+2026-08-14T22:42:02,373491+00:00 amdgpu 0000:83:00.0:  Process VLLM::EngineCor pid 12399 thread VLLM::EngineCor pid 12399
+2026-08-14T22:42:02,373492+00:00 amdgpu 0000:83:00.0:   in page starting at address 0x000079adfc200000 from IH client 0x1b (UTCL2)
+2026-08-14T22:42:02,373493+00:00 amdgpu 0000:83:00.0:   cookie node_id 13 fault from die AID3.XCD0
+2026-08-14T22:42:02,373494+00:00 amdgpu 0000:83:00.0: [gfxhub0] no-retry page fault (src_id:0 ring:160 vmid:3 pasid:102)
+2026-08-14T22:42:02,373495+00:00 amdgpu 0000:83:00.0:  Process VLLM::EngineCor pid 12399 thread VLLM::EngineCor pid 12399
+2026-08-14T22:42:02,373496+00:00 amdgpu 0000:83:00.0:   in page starting at address 0x000079adfc200000 from IH client 0x1b (UTCL2)
+2026-08-14T22:42:02,373496+00:00 amdgpu 0000:83:00.0:   cookie node_id 13 fault from die AID3.XCD0
+2026-08-14T22:42:02,373497+00:00 amdgpu 0000:83:00.0: [gfxhub0] no-retry page fault (src_id:0 ring:160 vmid:3 pasid:102)
+2026-08-14T22:42:02,373498+00:00 amdgpu 0000:83:00.0:  Process VLLM::EngineCor pid 12399 thread VLLM::EngineCor pid 12399
+2026-08-14T22:42:02,373499+00:00 amdgpu 0000:83:00.0:   in page starting at address 0x000079adfc200000 from IH client 0x1b (UTCL2)
+2026-08-14T22:42:02,373500+00:00 amdgpu 0000:83:00.0:   cookie node_id 13 fault from die AID3.XCD0
+2026-08-14T22:42:02,373501+00:00 amdgpu 0000:83:00.0: [gfxhub0] no-retry page fault (src_id:0 ring:160 vmid:3 pasid:102)
+2026-08-14T22:42:02,373502+00:00 amdgpu 0000:83:00.0:  Process VLLM::EngineCor pid 12399 thread VLLM::EngineCor pid 12399
+2026-08-14T22:42:02,373502+00:00 amdgpu 0000:83:00.0:   in page starting at address 0x000079adfc200000 from IH client 0x1b (UTCL2)
+2026-08-14T22:42:02,373503+00:00 amdgpu 0000:83:00.0:   cookie node_id 1 fault from die AID0.XCD0
+2026-08-14T22:42:02,373504+00:00 amdgpu 0000:83:00.0: [gfxhub0] no-retry page fault (src_id:0 ring:160 vmid:3 pasid:102)
+2026-08-14T22:42:02,373505+00:00 amdgpu 0000:83:00.0:  Process VLLM::EngineCor pid 12399 thread VLLM::EngineCor pid 12399
+2026-08-14T22:42:02,373506+00:00 amdgpu 0000:83:00.0:   in page starting at address 0x000079adfc200000 from IH client 0x1b (UTCL2)
+2026-08-14T22:42:02,373506+00:00 amdgpu 0000:83:00.0:   cookie node_id 6 fault from die AID1.XCD1
+2026-08-14T22:42:02,373507+00:00 amdgpu 0000:83:00.0: [gfxhub0] no-retry page fault (src_id:0 ring:160 vmid:3 pasid:102)
+2026-08-14T22:42:02,373508+00:00 amdgpu 0000:83:00.0:  Process VLLM::EngineCor pid 12399 thread VLLM::EngineCor pid 12399
+2026-08-14T22:42:02,373509+00:00 amdgpu 0000:83:00.0:   in page starting at address 0x000079adfc200000 from IH client 0x1b (UTCL2)
+2026-08-14T22:42:02,373509+00:00 amdgpu 0000:83:00.0:   cookie node_id 2 fault from die AID0.XCD1
+2026-08-14T22:42:02,373510+00:00 amdgpu 0000:83:00.0: [gfxhub0] no-retry page fault (src_id:0 ring:160 vmid:3 pasid:102)
+2026-08-14T22:42:02,373511+00:00 amdgpu 0000:83:00.0:  Process VLLM::EngineCor pid 12399 thread VLLM::EngineCor pid 12399
+2026-08-14T22:42:02,373512+00:00 amdgpu 0000:83:00.0:   in page starting at address 0x000079adfc200000 from IH client 0x1b (UTCL2)
+2026-08-14T22:42:02,373513+00:00 amdgpu 0000:83:00.0:   cookie node_id 1 fault from die AID0.XCD0
+2026-08-14T22:42:02,394019+00:00 amdgpu 0000:83:00.0:  Process VLLM::EngineCor pid 12399 thread VLLM::EngineCor pid 12399
+2026-08-14T22:42:02,394912+00:00 amdgpu 0000:83:00.0:   in page starting at address 0x000079adfc200000 from IH client 0x1b (UTCL2)
+2026-08-14T22:42:02,395777+00:00 amdgpu 0000:83:00.0:   cookie node_id 2 fault from die AID0.XCD1
+===== /root/gpu-faults.window2.log
+2026-08-14T23:19:31,763070+00:00 amdgpu 0000:83:00.0: renderD136 partition 7 not valid!
+2026-08-14T23:19:31,764347+00:00 amdgpu 0000:83:00.0: renderD135 partition 6 not valid!
+2026-08-14T23:19:31,765913+00:00 amdgpu 0000:83:00.0: renderD134 partition 5 not valid!
+2026-08-14T23:19:31,767019+00:00 amdgpu 0000:83:00.0: renderD133 partition 4 not valid!
+2026-08-14T23:19:31,768121+00:00 amdgpu 0000:83:00.0: renderD132 partition 3 not valid!
+2026-08-14T23:19:31,769214+00:00 amdgpu 0000:83:00.0: renderD131 partition 2 not valid!
+2026-08-14T23:19:31,770296+00:00 amdgpu 0000:83:00.0: renderD130 partition 1 not valid!
+2026-08-14T23:50:19,598883+00:00 amdgpu 0000:83:00.0: [gfxhub0] retry page fault (src_id:0 ring:0 vmid:3 pasid:134)
+2026-08-14T23:50:19,599471+00:00 amdgpu 0000:83:00.0: [gfxhub0] no-retry page fault (src_id:0 ring:160 vmid:3 pasid:134)
+2026-08-14T23:50:19,599473+00:00 amdgpu 0000:83:00.0:  Process VLLM::EngineCor pid 50553 thread VLLM::EngineCor pid 50553
+2026-08-14T23:50:19,599475+00:00 amdgpu 0000:83:00.0:   in page starting at address 0x0000716a70a01000 from IH client 0x1b (UTCL2)
+2026-08-14T23:50:19,599477+00:00 amdgpu 0000:83:00.0:   cookie node_id 13 fault from die AID3.XCD0
+2026-08-14T23:50:19,599480+00:00 amdgpu 0000:83:00.0: [gfxhub0] no-retry page fault (src_id:0 ring:160 vmid:3 pasid:134)
+2026-08-14T23:50:19,599482+00:00 amdgpu 0000:83:00.0:  Process VLLM::EngineCor pid 50553 thread VLLM::EngineCor pid 50553
+2026-08-14T23:50:19,599484+00:00 amdgpu 0000:83:00.0:   in page starting at address 0x0000716a70a01000 from IH client 0x1b (UTCL2)
+2026-08-14T23:50:19,599485+00:00 amdgpu 0000:83:00.0:   cookie node_id 14 fault from die AID3.XCD1
+2026-08-14T23:50:19,599486+00:00 amdgpu 0000:83:00.0: [gfxhub0] no-retry page fault (src_id:0 ring:160 vmid:3 pasid:134)
+2026-08-14T23:50:19,599487+00:00 amdgpu 0000:83:00.0:  Process VLLM::EngineCor pid 50553 thread VLLM::EngineCor pid 50553
+2026-08-14T23:50:19,599488+00:00 amdgpu 0000:83:00.0:   in page starting at address 0x0000716a70a01000 from IH client 0x1b (UTCL2)
+2026-08-14T23:50:19,599489+00:00 amdgpu 0000:83:00.0:   cookie node_id 1 fault from die AID0.XCD0
+2026-08-14T23:50:19,599490+00:00 amdgpu 0000:83:00.0: [gfxhub0] no-retry page fault (src_id:0 ring:160 vmid:3 pasid:134)
+2026-08-14T23:50:19,599491+00:00 amdgpu 0000:83:00.0:  Process VLLM::EngineCor pid 50553 thread VLLM::EngineCor pid 50553
+2026-08-14T23:50:19,599492+00:00 amdgpu 0000:83:00.0:   in page starting at address 0x0000716a70a01000 from IH client 0x1b (UTCL2)
+2026-08-14T23:50:19,599492+00:00 amdgpu 0000:83:00.0:   cookie node_id 9 fault from die AID2.XCD0
+2026-08-14T23:50:19,599493+00:00 amdgpu 0000:83:00.0: [gfxhub0] no-retry page fault (src_id:0 ring:160 vmid:3 pasid:134)
+2026-08-14T23:50:19,599494+00:00 amdgpu 0000:83:00.0:  Process VLLM::EngineCor pid 50553 thread VLLM::EngineCor pid 50553
+2026-08-14T23:50:19,599495+00:00 amdgpu 0000:83:00.0:   in page starting at address 0x0000716a70a01000 from IH client 0x1b (UTCL2)
+2026-08-14T23:50:19,599496+00:00 amdgpu 0000:83:00.0:   cookie node_id 2 fault from die AID0.XCD1
+2026-08-14T23:50:19,599497+00:00 amdgpu 0000:83:00.0: [gfxhub0] no-retry page fault (src_id:0 ring:160 vmid:3 pasid:134)
+2026-08-14T23:50:19,599497+00:00 amdgpu 0000:83:00.0:  Process VLLM::EngineCor pid 50553 thread VLLM::EngineCor pid 50553
+2026-08-14T23:50:19,599498+00:00 amdgpu 0000:83:00.0:   in page starting at address 0x0000716a70a01000 from IH client 0x1b (UTCL2)
+2026-08-14T23:50:19,599499+00:00 amdgpu 0000:83:00.0:   cookie node_id 5 fault from die AID1.XCD0
+2026-08-14T23:50:19,599500+00:00 amdgpu 0000:83:00.0: [gfxhub0] no-retry page fault (src_id:0 ring:160 vmid:3 pasid:134)
+2026-08-14T23:50:19,599501+00:00 amdgpu 0000:83:00.0:  Process VLLM::EngineCor pid 50553 thread VLLM::EngineCor pid 50553
+2026-08-14T23:50:19,599502+00:00 amdgpu 0000:83:00.0:   in page starting at address 0x0000716a70a01000 from IH client 0x1b (UTCL2)
+2026-08-14T23:50:19,599503+00:00 amdgpu 0000:83:00.0:   cookie node_id 13 fault from die AID3.XCD0
+2026-08-14T23:50:19,599504+00:00 amdgpu 0000:83:00.0: [gfxhub0] no-retry page fault (src_id:0 ring:160 vmid:3 pasid:134)
+2026-08-14T23:50:19,599506+00:00 amdgpu 0000:83:00.0:  Process VLLM::EngineCor pid 50553 thread VLLM::EngineCor pid 50553
+2026-08-14T23:50:19,599506+00:00 amdgpu 0000:83:00.0:   in page starting at address 0x0000716a70a01000 from IH client 0x1b (UTCL2)
+2026-08-14T23:50:19,599507+00:00 amdgpu 0000:83:00.0:   cookie node_id 14 fault from die AID3.XCD1
+2026-08-14T23:50:19,599508+00:00 amdgpu 0000:83:00.0: [gfxhub0] no-retry page fault (src_id:0 ring:160 vmid:3 pasid:134)
+2026-08-14T23:50:19,599509+00:00 amdgpu 0000:83:00.0:  Process VLLM::EngineCor pid 50553 thread VLLM::EngineCor pid 50553
+2026-08-14T23:50:19,599510+00:00 amdgpu 0000:83:00.0:   in page starting at address 0x0000716a70a01000 from IH client 0x1b (UTCL2)
+2026-08-14T23:50:19,599510+00:00 amdgpu 0000:83:00.0:   cookie node_id 6 fault from die AID1.XCD1
+2026-08-14T23:50:19,626001+00:00 amdgpu 0000:83:00.0:  Process VLLM::EngineCor pid 50553 thread VLLM::EngineCor pid 50553
+2026-08-14T23:50:19,626735+00:00 amdgpu 0000:83:00.0:   in page starting at address 0x0000716a70a01000 from IH client 0x1b (UTCL2)
+2026-08-14T23:50:19,627547+00:00 amdgpu 0000:83:00.0:   cookie node_id 5 fault from die AID1.XCD0
+===== /root/gpu-faults.window3.log
+2026-08-15T00:38:44,298479+00:00 amdgpu 0000:83:00.0: [gfxhub0] retry page fault (src_id:0 ring:0 vmid:3 pasid:219)
+2026-08-15T00:38:44,299304+00:00 amdgpu 0000:83:00.0:  Process VLLM::EngineCor pid 221304 thread VLLM::EngineCor pid 221304
+2026-08-15T00:38:44,300125+00:00 amdgpu 0000:83:00.0:   in page starting at address 0x00007aea63a00000 from IH client 0x1b (UTCL2)
+2026-08-15T00:38:44,300899+00:00 amdgpu 0000:83:00.0:   cookie node_id 10 fault from die AID2.XCD1
+2026-08-15T00:38:44,350421+00:00 amdgpu 0000:83:00.0: [gfxhub0] no-retry page fault (src_id:0 ring:160 vmid:3 pasid:219)
+2026-08-15T00:38:44,351247+00:00 amdgpu 0000:83:00.0:  Process VLLM::EngineCor pid 221304 thread VLLM::EngineCor pid 221304
+2026-08-15T00:38:44,352117+00:00 amdgpu 0000:83:00.0:   in page starting at address 0x00007aea63a00000 from IH client 0x1b (UTCL2)
+2026-08-15T00:38:44,353021+00:00 amdgpu 0000:83:00.0:   cookie node_id 2 fault from die AID0.XCD1
+2026-08-15T00:38:44,353731+00:00 amdgpu 0000:83:00.0: [gfxhub0] no-retry page fault (src_id:0 ring:160 vmid:3 pasid:219)
+2026-08-15T00:38:44,354540+00:00 amdgpu 0000:83:00.0:  Process VLLM::EngineCor pid 221304 thread VLLM::EngineCor pid 221304
+2026-08-15T00:38:44,355373+00:00 amdgpu 0000:83:00.0:   in page starting at address 0x00007aea63a00000 from IH client 0x1b (UTCL2)
+2026-08-15T00:38:44,356276+00:00 amdgpu 0000:83:00.0:   cookie node_id 2 fault from die AID0.XCD1
+2026-08-15T00:38:44,357003+00:00 amdgpu 0000:83:00.0: [gfxhub0] no-retry page fault (src_id:0 ring:160 vmid:3 pasid:219)
+2026-08-15T00:38:44,357842+00:00 amdgpu 0000:83:00.0:  Process VLLM::EngineCor pid 221304 thread VLLM::EngineCor pid 221304
+2026-08-15T00:38:44,358655+00:00 amdgpu 0000:83:00.0:   in page starting at address 0x00007aea63a01000 from IH client 0x1b (UTCL2)
+2026-08-15T00:38:44,359523+00:00 amdgpu 0000:83:00.0:   cookie node_id 2 fault from die AID0.XCD1
+2026-08-15T00:38:44,360259+00:00 amdgpu 0000:83:00.0: [gfxhub0] no-retry page fault (src_id:0 ring:160 vmid:3 pasid:219)
+2026-08-15T00:38:44,361107+00:00 amdgpu 0000:83:00.0:  Process VLLM::EngineCor pid 221304 thread VLLM::EngineCor pid 221304
+2026-08-15T00:38:44,361976+00:00 amdgpu 0000:83:00.0:   in page starting at address 0x00007aea63a01000 from IH client 0x1b (UTCL2)
+2026-08-15T00:38:44,362868+00:00 amdgpu 0000:83:00.0:   cookie node_id 2 fault from die AID0.XCD1
+2026-08-15T00:38:44,363569+00:00 amdgpu 0000:83:00.0: [gfxhub0] no-retry page fault (src_id:0 ring:160 vmid:3 pasid:219)
+2026-08-15T00:38:44,364419+00:00 amdgpu 0000:83:00.0:  Process VLLM::EngineCor pid 221304 thread VLLM::EngineCor pid 221304
+2026-08-15T00:38:44,365283+00:00 amdgpu 0000:83:00.0:   in page starting at address 0x00007aea63a01000 from IH client 0x1b (UTCL2)
+2026-08-15T00:38:44,366153+00:00 amdgpu 0000:83:00.0:   cookie node_id 9 fault from die AID2.XCD0
+2026-08-15T00:38:44,366839+00:00 amdgpu 0000:83:00.0: [gfxhub0] no-retry page fault (src_id:0 ring:160 vmid:3 pasid:219)
+2026-08-15T00:38:44,368914+00:00 amdgpu 0000:83:00.0:  Process VLLM::EngineCor pid 221304 thread VLLM::EngineCor pid 221304
+2026-08-15T00:38:44,369792+00:00 amdgpu 0000:83:00.0:   in page starting at address 0x00007aea63a00000 from IH client 0x1b (UTCL2)
+2026-08-15T00:38:44,370657+00:00 amdgpu 0000:83:00.0:   cookie node_id 9 fault from die AID2.XCD0
+2026-08-15T00:38:44,371347+00:00 amdgpu 0000:83:00.0: [gfxhub0] no-retry page fault (src_id:0 ring:160 vmid:3 pasid:219)
+2026-08-15T00:38:44,372149+00:00 amdgpu 0000:83:00.0:  Process VLLM::EngineCor pid 221304 thread VLLM::EngineCor pid 221304
+2026-08-15T00:38:44,372965+00:00 amdgpu 0000:83:00.0:   in page starting at address 0x00007aea63a01000 from IH client 0x1b (UTCL2)
+2026-08-15T00:38:44,373825+00:00 amdgpu 0000:83:00.0:   cookie node_id 9 fault from die AID2.XCD0
+2026-08-15T00:38:44,374516+00:00 amdgpu 0000:83:00.0: [gfxhub0] no-retry page fault (src_id:0 ring:160 vmid:3 pasid:219)
+2026-08-15T00:38:44,375318+00:00 amdgpu 0000:83:00.0:  Process VLLM::EngineCor pid 221304 thread VLLM::EngineCor pid 221304
+2026-08-15T00:38:44,376133+00:00 amdgpu 0000:83:00.0:   in page starting at address 0x00007aea63a00000 from IH client 0x1b (UTCL2)
+2026-08-15T00:38:44,376985+00:00 amdgpu 0000:83:00.0:   cookie node_id 9 fault from die AID2.XCD0
+2026-08-15T00:38:44,378110+00:00 amdgpu 0000:83:00.0: [gfxhub0] retry page fault (src_id:0 ring:0 vmid:3 pasid:219)
+2026-08-15T00:38:44,379205+00:00 amdgpu 0000:83:00.0:  Process VLLM::EngineCor pid 221304 thread VLLM::EngineCor pid 221304
+2026-08-15T00:38:44,379945+00:00 amdgpu 0000:83:00.0:   in page starting at address 0x00007aea63a11000 from IH client 0x1b (UTCL2)
+2026-08-15T00:38:44,380731+00:00 amdgpu 0000:83:00.0:   cookie node_id 2 fault from die AID0.XCD1
+===== /root/gpu-faults.window3b.log
+2026-08-15T01:27:12,640773+00:00 amdgpu 0000:83:00.0: [gfxhub0] retry page fault (src_id:0 ring:0 vmid:3 pasid:308)
+2026-08-15T01:27:12,641681+00:00 amdgpu 0000:83:00.0:  Process VLLM::EngineCor pid 631127 thread VLLM::EngineCor pid 631127
+2026-08-15T01:27:12,642479+00:00 amdgpu 0000:83:00.0:   in page starting at address 0x00007177d0200000 from IH client 0x1b (UTCL2)
+2026-08-15T01:27:12,643276+00:00 amdgpu 0000:83:00.0:   cookie node_id 10 fault from die AID2.XCD1
+2026-08-15T01:27:12,654572+00:00 workqueue: send_exception_work_handler [amdgpu] hogged CPU for >10000us 4 times, consider switching to WQ_UNBOUND
+2026-08-15T01:27:12,699269+00:00 amdgpu 0000:83:00.0: [gfxhub0] no-retry page fault (src_id:0 ring:160 vmid:3 pasid:308)
+2026-08-15T01:27:12,700211+00:00 amdgpu 0000:83:00.0:  Process VLLM::EngineCor pid 631127 thread VLLM::EngineCor pid 631127
+2026-08-15T01:27:12,701133+00:00 amdgpu 0000:83:00.0:   in page starting at address 0x00007177d0202000 from IH client 0x1b (UTCL2)
+2026-08-15T01:27:12,702072+00:00 amdgpu 0000:83:00.0:   cookie node_id 14 fault from die AID3.XCD1
+2026-08-15T01:27:12,702835+00:00 amdgpu 0000:83:00.0: [gfxhub0] no-retry page fault (src_id:0 ring:160 vmid:3 pasid:308)
+2026-08-15T01:27:12,703694+00:00 amdgpu 0000:83:00.0:  Process VLLM::EngineCor pid 631127 thread VLLM::EngineCor pid 631127
+2026-08-15T01:27:12,704565+00:00 amdgpu 0000:83:00.0:   in page starting at address 0x00007177d0200000 from IH client 0x1b (UTCL2)
+2026-08-15T01:27:12,705422+00:00 amdgpu 0000:83:00.0:   cookie node_id 2 fault from die AID0.XCD1
+2026-08-15T01:27:12,706114+00:00 amdgpu 0000:83:00.0: [gfxhub0] no-retry page fault (src_id:0 ring:160 vmid:3 pasid:308)
+2026-08-15T01:27:12,706920+00:00 amdgpu 0000:83:00.0:  Process VLLM::EngineCor pid 631127 thread VLLM::EngineCor pid 631127
+2026-08-15T01:27:12,707740+00:00 amdgpu 0000:83:00.0:   in page starting at address 0x00007177d0202000 from IH client 0x1b (UTCL2)
+2026-08-15T01:27:12,708603+00:00 amdgpu 0000:83:00.0:   cookie node_id 14 fault from die AID3.XCD1
+2026-08-15T01:27:12,709301+00:00 amdgpu 0000:83:00.0: [gfxhub0] no-retry page fault (src_id:0 ring:160 vmid:3 pasid:308)
+2026-08-15T01:27:12,710111+00:00 amdgpu 0000:83:00.0:  Process VLLM::EngineCor pid 631127 thread VLLM::EngineCor pid 631127
+2026-08-15T01:27:12,710932+00:00 amdgpu 0000:83:00.0:   in page starting at address 0x00007177d0200000 from IH client 0x1b (UTCL2)
+2026-08-15T01:27:12,711789+00:00 amdgpu 0000:83:00.0:   cookie node_id 14 fault from die AID3.XCD1
+2026-08-15T01:27:12,712485+00:00 amdgpu 0000:83:00.0: [gfxhub0] no-retry page fault (src_id:0 ring:160 vmid:3 pasid:308)
+2026-08-15T01:27:12,713294+00:00 amdgpu 0000:83:00.0:  Process VLLM::EngineCor pid 631127 thread VLLM::EngineCor pid 631127
+2026-08-15T01:27:12,714114+00:00 amdgpu 0000:83:00.0:   in page starting at address 0x00007177d0201000 from IH client 0x1b (UTCL2)
+2026-08-15T01:27:12,714968+00:00 amdgpu 0000:83:00.0:   cookie node_id 2 fault from die AID0.XCD1
+2026-08-15T01:27:12,715669+00:00 amdgpu 0000:83:00.0: [gfxhub0] no-retry page fault (src_id:0 ring:160 vmid:3 pasid:308)
+2026-08-15T01:27:12,716526+00:00 amdgpu 0000:83:00.0:  Process VLLM::EngineCor pid 631127 thread VLLM::EngineCor pid 631127
+2026-08-15T01:27:12,717393+00:00 amdgpu 0000:83:00.0:   in page starting at address 0x00007177d0201000 from IH client 0x1b (UTCL2)
+2026-08-15T01:27:12,717573+00:00 workqueue: copy_context_work_handler [amdgpu] hogged CPU for >10000us 4 times, consider switching to WQ_UNBOUND
+2026-08-15T01:27:12,718299+00:00 amdgpu 0000:83:00.0:   cookie node_id 14 fault from die AID3.XCD1
+2026-08-15T01:27:12,719036+00:00 amdgpu 0000:83:00.0: [gfxhub0] no-retry page fault (src_id:0 ring:160 vmid:3 pasid:308)
+2026-08-15T01:27:12,719888+00:00 amdgpu 0000:83:00.0:  Process VLLM::EngineCor pid 631127 thread VLLM::EngineCor pid 631127
+2026-08-15T01:27:12,720758+00:00 amdgpu 0000:83:00.0:   in page starting at address 0x00007177d0201000 from IH client 0x1b (UTCL2)
+2026-08-15T01:27:12,721663+00:00 amdgpu 0000:83:00.0:   cookie node_id 2 fault from die AID0.XCD1
+2026-08-15T01:27:12,722392+00:00 amdgpu 0000:83:00.0: [gfxhub0] no-retry page fault (src_id:0 ring:160 vmid:3 pasid:308)
+2026-08-15T01:27:12,723243+00:00 amdgpu 0000:83:00.0:  Process VLLM::EngineCor pid 631127 thread VLLM::EngineCor pid 631127
+2026-08-15T01:27:12,724065+00:00 amdgpu 0000:83:00.0:   in page starting at address 0x00007177d0202000 from IH client 0x1b (UTCL2)
+2026-08-15T01:27:12,724924+00:00 amdgpu 0000:83:00.0:   cookie node_id 2 fault from die AID0.XCD1
+2026-08-15T01:27:12,725615+00:00 amdgpu 0000:83:00.0: [gfxhub0] no-retry page fault (src_id:0 ring:160 vmid:3 pasid:308)
+2026-08-15T01:27:12,726417+00:00 amdgpu 0000:83:00.0:  Process VLLM::EngineCor pid 631127 thread VLLM::EngineCor pid 631127
+2026-08-15T01:27:12,727233+00:00 amdgpu 0000:83:00.0:   in page starting at address 0x00007177d0200000 from IH client 0x1b (UTCL2)
+2026-08-15T01:27:12,728086+00:00 amdgpu 0000:83:00.0:   cookie node_id 14 fault from die AID3.XCD1
+===== /root/gpu-faults.window4.log
+2026-08-15T02:17:32,506050+00:00 amdgpu 0000:83:00.0: renderD136 partition 7 not valid!
+2026-08-15T02:17:32,507327+00:00 amdgpu 0000:83:00.0: renderD135 partition 6 not valid!
+2026-08-15T02:17:32,508533+00:00 amdgpu 0000:83:00.0: renderD134 partition 5 not valid!
+2026-08-15T02:17:32,509556+00:00 amdgpu 0000:83:00.0: renderD133 partition 4 not valid!
+2026-08-15T02:17:32,510522+00:00 amdgpu 0000:83:00.0: renderD132 partition 3 not valid!
+2026-08-15T02:17:32,511742+00:00 amdgpu 0000:83:00.0: renderD131 partition 2 not valid!
+2026-08-15T02:17:32,512838+00:00 amdgpu 0000:83:00.0: renderD130 partition 1 not valid!
+2026-08-15T02:28:37,818376+00:00 amdgpu 0000:83:00.0: [gfxhub0] retry page fault (src_id:0 ring:0 vmid:3 pasid:421)
+2026-08-15T02:28:37,818899+00:00 amdgpu 0000:83:00.0: [gfxhub0] no-retry page fault (src_id:0 ring:160 vmid:3 pasid:421)
+2026-08-15T02:28:37,818901+00:00 amdgpu 0000:83:00.0:  Process VLLM::EngineCor pid 1110067 thread VLLM::EngineCor pid 1110067
+2026-08-15T02:28:37,818903+00:00 amdgpu 0000:83:00.0:   in page starting at address 0x00007b18c8800000 from IH client 0x1b (UTCL2)
+2026-08-15T02:28:37,818905+00:00 amdgpu 0000:83:00.0:   cookie node_id 5 fault from die AID1.XCD0
+2026-08-15T02:28:37,818907+00:00 amdgpu 0000:83:00.0: [gfxhub0] no-retry page fault (src_id:0 ring:160 vmid:3 pasid:421)
+2026-08-15T02:28:37,818909+00:00 amdgpu 0000:83:00.0:  Process VLLM::EngineCor pid 1110067 thread VLLM::EngineCor pid 1110067
+2026-08-15T02:28:37,818910+00:00 amdgpu 0000:83:00.0:   in page starting at address 0x00007b18c8800000 from IH client 0x1b (UTCL2)
+2026-08-15T02:28:37,818911+00:00 amdgpu 0000:83:00.0:   cookie node_id 10 fault from die AID2.XCD1
+2026-08-15T02:28:37,818912+00:00 amdgpu 0000:83:00.0: [gfxhub0] no-retry page fault (src_id:0 ring:160 vmid:3 pasid:421)
+2026-08-15T02:28:37,818913+00:00 amdgpu 0000:83:00.0:  Process VLLM::EngineCor pid 1110067 thread VLLM::EngineCor pid 1110067
+2026-08-15T02:28:37,818914+00:00 amdgpu 0000:83:00.0:   in page starting at address 0x00007b18c8800000 from IH client 0x1b (UTCL2)
+2026-08-15T02:28:37,818915+00:00 amdgpu 0000:83:00.0:   cookie node_id 10 fault from die AID2.XCD1
+2026-08-15T02:28:37,818916+00:00 amdgpu 0000:83:00.0: [gfxhub0] no-retry page fault (src_id:0 ring:160 vmid:3 pasid:421)
+2026-08-15T02:28:37,818917+00:00 amdgpu 0000:83:00.0:  Process VLLM::EngineCor pid 1110067 thread VLLM::EngineCor pid 1110067
+2026-08-15T02:28:37,818917+00:00 amdgpu 0000:83:00.0:   in page starting at address 0x00007b18c8800000 from IH client 0x1b (UTCL2)
+2026-08-15T02:28:37,818918+00:00 amdgpu 0000:83:00.0:   cookie node_id 9 fault from die AID2.XCD0
+2026-08-15T02:28:37,818920+00:00 amdgpu 0000:83:00.0: [gfxhub0] no-retry page fault (src_id:0 ring:160 vmid:3 pasid:421)
+2026-08-15T02:28:37,818921+00:00 amdgpu 0000:83:00.0:  Process VLLM::EngineCor pid 1110067 thread VLLM::EngineCor pid 1110067
+2026-08-15T02:28:37,818921+00:00 amdgpu 0000:83:00.0:   in page starting at address 0x00007b18c8800000 from IH client 0x1b (UTCL2)
+2026-08-15T02:28:37,818922+00:00 amdgpu 0000:83:00.0:   cookie node_id 14 fault from die AID3.XCD1
+2026-08-15T02:28:37,818923+00:00 amdgpu 0000:83:00.0: [gfxhub0] no-retry page fault (src_id:0 ring:160 vmid:3 pasid:421)
+2026-08-15T02:28:37,818924+00:00 amdgpu 0000:83:00.0:  Process VLLM::EngineCor pid 1110067 thread VLLM::EngineCor pid 1110067
+2026-08-15T02:28:37,818925+00:00 amdgpu 0000:83:00.0:   in page starting at address 0x00007b18c8800000 from IH client 0x1b (UTCL2)
+2026-08-15T02:28:37,818926+00:00 amdgpu 0000:83:00.0:   cookie node_id 9 fault from die AID2.XCD0
+2026-08-15T02:28:37,818928+00:00 amdgpu 0000:83:00.0: [gfxhub0] no-retry page fault (src_id:0 ring:160 vmid:3 pasid:421)
+2026-08-15T02:28:37,818928+00:00 amdgpu 0000:83:00.0:  Process VLLM::EngineCor pid 1110067 thread VLLM::EngineCor pid 1110067
+2026-08-15T02:28:37,818929+00:00 amdgpu 0000:83:00.0:   in page starting at address 0x00007b18c8800000 from IH client 0x1b (UTCL2)
+2026-08-15T02:28:37,818930+00:00 amdgpu 0000:83:00.0:   cookie node_id 9 fault from die AID2.XCD0
+2026-08-15T02:28:37,818931+00:00 amdgpu 0000:83:00.0: [gfxhub0] no-retry page fault (src_id:0 ring:160 vmid:3 pasid:421)
+2026-08-15T02:28:37,818931+00:00 amdgpu 0000:83:00.0:  Process VLLM::EngineCor pid 1110067 thread VLLM::EngineCor pid 1110067
+2026-08-15T02:28:37,818932+00:00 amdgpu 0000:83:00.0:   in page starting at address 0x00007b18c8800000 from IH client 0x1b (UTCL2)
+2026-08-15T02:28:37,818933+00:00 amdgpu 0000:83:00.0:   cookie node_id 6 fault from die AID1.XCD1
+2026-08-15T02:28:37,818934+00:00 amdgpu 0000:83:00.0: [gfxhub0] no-retry page fault (src_id:0 ring:160 vmid:3 pasid:421)
+2026-08-15T02:28:37,818934+00:00 amdgpu 0000:83:00.0:  Process VLLM::EngineCor pid 1110067 thread VLLM::EngineCor pid 1110067
+2026-08-15T02:28:37,818935+00:00 amdgpu 0000:83:00.0:   in page starting at address 0x00007b18c8800000 from IH client 0x1b (UTCL2)
+2026-08-15T02:28:37,818936+00:00 amdgpu 0000:83:00.0:   cookie node_id 6 fault from die AID1.XCD1
+2026-08-15T02:28:37,844136+00:00 amdgpu 0000:83:00.0:  Process VLLM::EngineCor pid 1110067 thread VLLM::EngineCor pid 1110067
+2026-08-15T02:28:37,844850+00:00 amdgpu 0000:83:00.0:   in page starting at address 0x00007b18c8800000 from IH client 0x1b (UTCL2)
+2026-08-15T02:28:37,845593+00:00 amdgpu 0000:83:00.0:   cookie node_id 13 fault from die AID3.XCD0
+2026-08-15T02:28:38,190355+00:00 workqueue: amdgpu_amdkfd_restore_userptr_worker [amdgpu] hogged CPU for >10000us 4 times, consider switching to WQ_UNBOUND
+2026-08-15T02:31:00,911848+00:00 amdgpu 0000:83:00.0: renderD136 partition 7 not valid!
+2026-08-15T02:31:00,913762+00:00 amdgpu 0000:83:00.0: renderD135 partition 6 not valid!
+2026-08-15T02:31:00,914682+00:00 amdgpu 0000:83:00.0: renderD134 partition 5 not valid!
+2026-08-15T02:31:00,915888+00:00 amdgpu 0000:83:00.0: renderD133 partition 4 not valid!
+2026-08-15T02:31:00,917052+00:00 amdgpu 0000:83:00.0: renderD132 partition 3 not valid!
+2026-08-15T02:31:00,918297+00:00 amdgpu 0000:83:00.0: renderD131 partition 2 not valid!
+2026-08-15T02:31:00,919262+00:00 amdgpu 0000:83:00.0: renderD130 partition 1 not valid!
+2026-08-15T02:38:17,728220+00:00 amdgpu 0000:83:00.0: [gfxhub0] retry page fault (src_id:0 ring:0 vmid:3 pasid:461)
+2026-08-15T02:38:17,728744+00:00 amdgpu 0000:83:00.0: [gfxhub0] no-retry page fault (src_id:0 ring:160 vmid:3 pasid:461)
+2026-08-15T02:38:17,728745+00:00 amdgpu 0000:83:00.0:  Process VLLM::EngineCor pid 1203201 thread VLLM::EngineCor pid 1203201
+2026-08-15T02:38:17,728747+00:00 amdgpu 0000:83:00.0:   in page starting at address 0x00007939d0201000 from IH client 0x1b (UTCL2)
+2026-08-15T02:38:17,728749+00:00 amdgpu 0000:83:00.0:   cookie node_id 1 fault from die AID0.XCD0
+2026-08-15T02:38:17,728752+00:00 amdgpu 0000:83:00.0: [gfxhub0] no-retry page fault (src_id:0 ring:160 vmid:3 pasid:461)
+2026-08-15T02:38:17,728753+00:00 amdgpu 0000:83:00.0:  Process VLLM::EngineCor pid 1203201 thread VLLM::EngineCor pid 1203201
+2026-08-15T02:38:17,728754+00:00 amdgpu 0000:83:00.0:   in page starting at address 0x00007939d0201000 from IH client 0x1b (UTCL2)
+2026-08-15T02:38:17,728754+00:00 amdgpu 0000:83:00.0:   cookie node_id 13 fault from die AID3.XCD0
+2026-08-15T02:38:17,728756+00:00 amdgpu 0000:83:00.0: [gfxhub0] no-retry page fault (src_id:0 ring:160 vmid:3 pasid:461)
+2026-08-15T02:38:17,728757+00:00 amdgpu 0000:83:00.0:  Process VLLM::EngineCor pid 1203201 thread VLLM::EngineCor pid 1203201
+2026-08-15T02:38:17,728758+00:00 amdgpu 0000:83:00.0:   in page starting at address 0x00007939d0201000 from IH client 0x1b (UTCL2)
+2026-08-15T02:38:17,728758+00:00 amdgpu 0000:83:00.0:   cookie node_id 14 fault from die AID3.XCD1
+2026-08-15T02:38:17,728759+00:00 amdgpu 0000:83:00.0: [gfxhub0] no-retry page fault (src_id:0 ring:160 vmid:3 pasid:461)
+2026-08-15T02:38:17,728760+00:00 amdgpu 0000:83:00.0:  Process VLLM::EngineCor pid 1203201 thread VLLM::EngineCor pid 1203201
+2026-08-15T02:38:17,728761+00:00 amdgpu 0000:83:00.0:   in page starting at address 0x00007939d0201000 from IH client 0x1b (UTCL2)
+2026-08-15T02:38:17,728762+00:00 amdgpu 0000:83:00.0:   cookie node_id 6 fault from die AID1.XCD1
+2026-08-15T02:38:17,728763+00:00 amdgpu 0000:83:00.0: [gfxhub0] no-retry page fault (src_id:0 ring:160 vmid:3 pasid:461)
+2026-08-15T02:38:17,728764+00:00 amdgpu 0000:83:00.0:  Process VLLM::EngineCor pid 1203201 thread VLLM::EngineCor pid 1203201
+2026-08-15T02:38:17,728764+00:00 amdgpu 0000:83:00.0:   in page starting at address 0x00007939d0201000 from IH client 0x1b (UTCL2)
+2026-08-15T02:38:17,728765+00:00 amdgpu 0000:83:00.0:   cookie node_id 9 fault from die AID2.XCD0
+2026-08-15T02:38:17,728766+00:00 amdgpu 0000:83:00.0: [gfxhub0] no-retry page fault (src_id:0 ring:160 vmid:3 pasid:461)
+2026-08-15T02:38:17,728767+00:00 amdgpu 0000:83:00.0:  Process VLLM::EngineCor pid 1203201 thread VLLM::EngineCor pid 1203201
+2026-08-15T02:38:17,728768+00:00 amdgpu 0000:83:00.0:   in page starting at address 0x00007939d0201000 from IH client 0x1b (UTCL2)
+2026-08-15T02:38:17,728769+00:00 amdgpu 0000:83:00.0:   cookie node_id 10 fault from die AID2.XCD1
+2026-08-15T02:38:17,728770+00:00 amdgpu 0000:83:00.0: [gfxhub0] no-retry page fault (src_id:0 ring:160 vmid:3 pasid:461)
+2026-08-15T02:38:17,728771+00:00 amdgpu 0000:83:00.0:  Process VLLM::EngineCor pid 1203201 thread VLLM::EngineCor pid 1203201
+2026-08-15T02:38:17,728771+00:00 amdgpu 0000:83:00.0:   in page starting at address 0x00007939d0201000 from IH client 0x1b (UTCL2)
+2026-08-15T02:38:17,728772+00:00 amdgpu 0000:83:00.0:   cookie node_id 13 fault from die AID3.XCD0
+2026-08-15T02:38:17,728773+00:00 amdgpu 0000:83:00.0: [gfxhub0] no-retry page fault (src_id:0 ring:160 vmid:3 pasid:461)
+2026-08-15T02:38:17,728774+00:00 amdgpu 0000:83:00.0:  Process VLLM::EngineCor pid 1203201 thread VLLM::EngineCor pid 1203201
+2026-08-15T02:38:17,728774+00:00 amdgpu 0000:83:00.0:   in page starting at address 0x00007939d0201000 from IH client 0x1b (UTCL2)
+2026-08-15T02:38:17,728775+00:00 amdgpu 0000:83:00.0:   cookie node_id 2 fault from die AID0.XCD1
+2026-08-15T02:38:17,728776+00:00 amdgpu 0000:83:00.0: [gfxhub0] no-retry page fault (src_id:0 ring:160 vmid:3 pasid:461)
+2026-08-15T02:38:17,728777+00:00 amdgpu 0000:83:00.0:  Process VLLM::EngineCor pid 1203201 thread VLLM::EngineCor pid 1203201
+2026-08-15T02:38:17,728777+00:00 amdgpu 0000:83:00.0:   in page starting at address 0x00007939d0201000 from IH client 0x1b (UTCL2)
+2026-08-15T02:38:17,728778+00:00 amdgpu 0000:83:00.0:   cookie node_id 5 fault from die AID1.XCD0
+2026-08-15T02:38:17,759312+00:00 amdgpu 0000:83:00.0:  Process VLLM::EngineCor pid 1203201 thread VLLM::EngineCor pid 1203201
+2026-08-15T02:38:17,760064+00:00 amdgpu 0000:83:00.0:   in page starting at address 0x00007939d0201000 from IH client 0x1b (UTCL2)
+2026-08-15T02:38:17,760937+00:00 amdgpu 0000:83:00.0:   cookie node_id 13 fault from die AID3.XCD0
+===== /root/gpu-faults.window5.log
+2026-08-15T02:42:03,973148+00:00 workqueue: copy_context_work_handler [amdgpu] hogged CPU for >10000us 8 times, consider switching to WQ_UNBOUND
+2026-08-15T02:49:33,017820+00:00 workqueue: svm_range_restore_work [amdgpu] hogged CPU for >10000us 4 times, consider switching to WQ_UNBOUND
+2026-08-15T02:50:32,798718+00:00 workqueue: svm_range_restore_work [amdgpu] hogged CPU for >10000us 8 times, consider switching to WQ_UNBOUND
+2026-08-15T02:53:37,009750+00:00 amdgpu 0000:83:00.0: [gfxhub0] retry page fault (src_id:0 ring:0 vmid:3 pasid:546)
+2026-08-15T02:53:37,010272+00:00 amdgpu 0000:83:00.0: [gfxhub0] no-retry page fault (src_id:0 ring:160 vmid:3 pasid:546)
+2026-08-15T02:53:37,010274+00:00 amdgpu 0000:83:00.0:  Process VLLM::EngineCor pid 1257661 thread VLLM::EngineCor pid 1257661
+2026-08-15T02:53:37,010275+00:00 amdgpu 0000:83:00.0:   in page starting at address 0x0000768424800000 from IH client 0x1b (UTCL2)
+2026-08-15T02:53:37,010277+00:00 amdgpu 0000:83:00.0:   cookie node_id 1 fault from die AID0.XCD0
+2026-08-15T02:53:37,010280+00:00 amdgpu 0000:83:00.0: [gfxhub0] no-retry page fault (src_id:0 ring:160 vmid:3 pasid:546)
+2026-08-15T02:53:37,010281+00:00 amdgpu 0000:83:00.0:  Process VLLM::EngineCor pid 1257661 thread VLLM::EngineCor pid 1257661
+2026-08-15T02:53:37,010282+00:00 amdgpu 0000:83:00.0:   in page starting at address 0x0000768424800000 from IH client 0x1b (UTCL2)
+2026-08-15T02:53:37,010283+00:00 amdgpu 0000:83:00.0:   cookie node_id 5 fault from die AID1.XCD0
+2026-08-15T02:53:37,010283+00:00 amdgpu 0000:83:00.0: [gfxhub0] no-retry page fault (src_id:0 ring:160 vmid:3 pasid:546)
+2026-08-15T02:53:37,010284+00:00 amdgpu 0000:83:00.0:  Process VLLM::EngineCor pid 1257661 thread VLLM::EngineCor pid 1257661
+2026-08-15T02:53:37,010285+00:00 amdgpu 0000:83:00.0:   in page starting at address 0x0000768424800000 from IH client 0x1b (UTCL2)
+2026-08-15T02:53:37,010286+00:00 amdgpu 0000:83:00.0:   cookie node_id 6 fault from die AID1.XCD1
+2026-08-15T02:53:37,010287+00:00 amdgpu 0000:83:00.0: [gfxhub0] no-retry page fault (src_id:0 ring:160 vmid:3 pasid:546)
+2026-08-15T02:53:37,010288+00:00 amdgpu 0000:83:00.0:  Process VLLM::EngineCor pid 1257661 thread VLLM::EngineCor pid 1257661
+2026-08-15T02:53:37,010289+00:00 amdgpu 0000:83:00.0:   in page starting at address 0x0000768424800000 from IH client 0x1b (UTCL2)
+2026-08-15T02:53:37,010290+00:00 amdgpu 0000:83:00.0:   cookie node_id 1 fault from die AID0.XCD0
+2026-08-15T02:53:37,010291+00:00 amdgpu 0000:83:00.0: [gfxhub0] no-retry page fault (src_id:0 ring:160 vmid:3 pasid:546)
+2026-08-15T02:53:37,010292+00:00 amdgpu 0000:83:00.0:  Process VLLM::EngineCor pid 1257661 thread VLLM::EngineCor pid 1257661
+2026-08-15T02:53:37,010292+00:00 amdgpu 0000:83:00.0:   in page starting at address 0x0000768424800000 from IH client 0x1b (UTCL2)
+2026-08-15T02:53:37,010293+00:00 amdgpu 0000:83:00.0:   cookie node_id 2 fault from die AID0.XCD1
+2026-08-15T02:53:37,010294+00:00 amdgpu 0000:83:00.0: [gfxhub0] no-retry page fault (src_id:0 ring:160 vmid:3 pasid:546)
+2026-08-15T02:53:37,010295+00:00 amdgpu 0000:83:00.0:  Process VLLM::EngineCor pid 1257661 thread VLLM::EngineCor pid 1257661
+2026-08-15T02:53:37,010296+00:00 amdgpu 0000:83:00.0:   in page starting at address 0x0000768424800000 from IH client 0x1b (UTCL2)
+2026-08-15T02:53:37,010297+00:00 amdgpu 0000:83:00.0:   cookie node_id 5 fault from die AID1.XCD0
+2026-08-15T02:53:37,010299+00:00 amdgpu 0000:83:00.0: [gfxhub0] no-retry page fault (src_id:0 ring:160 vmid:3 pasid:546)
+2026-08-15T02:53:37,010300+00:00 amdgpu 0000:83:00.0:  Process VLLM::EngineCor pid 1257661 thread VLLM::EngineCor pid 1257661
+2026-08-15T02:53:37,010301+00:00 amdgpu 0000:83:00.0:   in page starting at address 0x0000768424800000 from IH client 0x1b (UTCL2)
+2026-08-15T02:53:37,010302+00:00 amdgpu 0000:83:00.0:   cookie node_id 10 fault from die AID2.XCD1
+2026-08-15T02:53:37,010303+00:00 amdgpu 0000:83:00.0: [gfxhub0] no-retry page fault (src_id:0 ring:160 vmid:3 pasid:546)
+2026-08-15T02:53:37,010303+00:00 amdgpu 0000:83:00.0:  Process VLLM::EngineCor pid 1257661 thread VLLM::EngineCor pid 1257661
+2026-08-15T02:53:37,010304+00:00 amdgpu 0000:83:00.0:   in page starting at address 0x0000768424800000 from IH client 0x1b (UTCL2)
+2026-08-15T02:53:37,010305+00:00 amdgpu 0000:83:00.0:   cookie node_id 5 fault from die AID1.XCD0
+2026-08-15T02:53:37,010306+00:00 amdgpu 0000:83:00.0: [gfxhub0] no-retry page fault (src_id:0 ring:160 vmid:3 pasid:546)
+2026-08-15T02:53:37,010307+00:00 amdgpu 0000:83:00.0:  Process VLLM::EngineCor pid 1257661 thread VLLM::EngineCor pid 1257661
+2026-08-15T02:53:37,010308+00:00 amdgpu 0000:83:00.0:   in page starting at address 0x0000768424800000 from IH client 0x1b (UTCL2)
+2026-08-15T02:53:37,010308+00:00 amdgpu 0000:83:00.0:   cookie node_id 1 fault from die AID0.XCD0
+2026-08-15T02:53:37,037080+00:00 amdgpu 0000:83:00.0:  Process VLLM::EngineCor pid 1257661 thread VLLM::EngineCor pid 1257661
+2026-08-15T02:53:37,037837+00:00 amdgpu 0000:83:00.0:   in page starting at address 0x0000768424800000 from IH client 0x1b (UTCL2)
+2026-08-15T02:53:37,038709+00:00 amdgpu 0000:83:00.0:   cookie node_id 13 fault from die AID3.XCD0
+2026-08-15T02:53:38,957504+00:00 workqueue: svm_range_restore_work [amdgpu] hogged CPU for >10000us 16 times, consider switching to WQ_UNBOUND
+2026-08-15T02:56:39,492193+00:00 workqueue: copy_context_work_handler [amdgpu] hogged CPU for >10000us 16 times, consider switching to WQ_UNBOUND
