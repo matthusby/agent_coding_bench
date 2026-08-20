@@ -1,0 +1,3 @@
+2026-08-20T16:08:53,186976+00:00 workqueue: copy_context_work_handler [amdgpu] hogged CPU for >10000us 4 times, consider switching to WQ_UNBOUND
+2026-08-20T17:31:41,870090+00:00 workqueue: svm_range_evict_svm_bo_worker [amdgpu] hogged CPU for >10000us 4 times, consider switching to WQ_UNBOUND
+2026-08-20T17:31:42,099094+00:00 workqueue: svm_range_evict_svm_bo_worker [amdgpu] hogged CPU for >10000us 8 times, consider switching to WQ_UNBOUND
