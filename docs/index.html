@@ -233,6 +233,22 @@ and the queue stays near empty: the engine is keeping up with demand, not
 saturating. Scaling from 8 to 32 lanes costs about half a second of median
 TTFT and buys 63% more generation throughput.</p>
 
+<h2>What it costs</h2>
+<p>The box rents for $2/hour. Against the tuned 32-agent window, that works
+out to:</p>
+<div class="tiles">
+  <div class="tile"><div class="label">Per 1M generated tokens</div><div class="value">$0.95</div><div class="sub">582 tok/s sustained</div></div>
+  <div class="tile"><div class="label">Per 1M prompt tokens delivered</div><div class="value">$0.007</div><div class="sub">97.9% served from cache</div></div>
+  <div class="tile"><div class="label">Per 1M prompt tokens computed</div><div class="value">$0.33</div><div class="sub">the uncached 2.1%</div></div>
+</div>
+<p>The delivered prompt number is only that low because caching absorbs
+nearly everything. Of the 142M prompt tokens in the window, <strong>93.0%</strong>
+came from the GPU prefix cache, <strong>4.9%</strong> from the CPU KV offload
+tier, and only <strong>2.1%</strong> were actually computed. Keep that in mind
+when comparing against per-token API pricing, where cached input is billed
+too; the computed-token price is the number that reflects work the GPU
+actually did.</p>
+
 <h2>What tuning bought</h2>
 <p>The stack ships AITER GEMM tuning for prefill sizes this workload never
 produces (the scheduler caps prefill chunks below every tuned shape), so

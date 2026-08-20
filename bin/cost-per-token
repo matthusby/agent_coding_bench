@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+usage() { echo "Usage: bin/cost-per-token <run-id> <dollars-per-hour>" >&2; exit 1; }
+[[ $# -eq 2 ]] || usage
+
+RUN_ID="$1"
+RATE="$2"
+
+psql -U postgres -h localhost -d agent_coding_bench_dev -tA -F' ' -c "
+WITH r AS (SELECT * FROM runs WHERE id = $RUN_ID),
+d AS (
+  SELECT s.metric,
+         GREATEST(s.value - lag(s.value) OVER (PARTITION BY s.metric, s.labels ORDER BY s.scraped_at), 0) AS d,
+         EXTRACT(epoch FROM r.ended_at - r.started_at) AS dur,
+         r.lane_count
+  FROM r JOIN samples s ON s.scraped_at BETWEEN r.started_at AND r.ended_at
+  WHERE s.metric IN ('vllm:generation_tokens_total','vllm:prompt_tokens_total','vllm:prompt_tokens_cached_total')
+)
+SELECT max(lane_count),
+       sum(d) FILTER (WHERE metric='vllm:generation_tokens_total')/max(dur),
+       sum(d) FILTER (WHERE metric='vllm:prompt_tokens_total')/max(dur),
+       sum(d) FILTER (WHERE metric='vllm:prompt_tokens_cached_total')/max(dur)
+FROM d;" | awk -v rate="$RATE" -v run="$RUN_ID" '{
+  lanes=$1; gen=$2; prompt=$3; cached=$4; computed=prompt-cached
+  printf "run %s: %d lanes, %.0f gen tok/s, %.0f prompt tok/s (%.1f%% cached), $%.2f/hour\n\n", run, lanes, gen, prompt, 100*cached/prompt, rate
+  printf "  $ per 1M generated tokens        %.2f\n", rate / (gen*3600/1e6)
+  printf "  $ per 1M prompt tokens delivered %.4f\n", rate / (prompt*3600/1e6)
+  printf "  $ per 1M prompt tokens computed  %.2f\n", rate / (computed*3600/1e6)
+}'
