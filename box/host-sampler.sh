@@ -5,7 +5,7 @@ OUT=/root/host-samples.csv
 [ -s "$OUT" ] || echo 'ts,load1,memfree_kb,containers,engine_cpu_pct,gpu_busy_pct,gpu_power_w' >> "$OUT"
 
 gpu_power_w() {
-  for f in /sys/class/hwmon/hwmon*/power1_average; do
+  for f in /sys/class/hwmon/hwmon*/power1_average /sys/class/hwmon/hwmon*/power1_input; do
     [ -r "$f" ] || continue
     awk '{ printf "%.0f", $1 / 1000000 }' "$f"
     return
