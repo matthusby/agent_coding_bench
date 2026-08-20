@@ -1,0 +1,298 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>32 coding agents on one MI300X</title>
+<meta name="description" content="Measured performance of DeepSeek V4 Flash serving real autonomous coding agents on a single AMD MI300X.">
+<style>
+:root {
+  color-scheme: light;
+  --page: #f9f9f7;
+  --surface: #fcfcfb;
+  --ink: #0b0b0b;
+  --ink-2: #52514e;
+  --muted: #898781;
+  --grid: #e1e0d9;
+  --axis: #c3c2b7;
+  --series: #2a78d6;
+  --border: rgba(11,11,11,0.10);
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --page: #0d0d0d;
+    --surface: #1a1a19;
+    --ink: #ffffff;
+    --ink-2: #c3c2b7;
+    --muted: #898781;
+    --grid: #2c2c2a;
+    --axis: #383835;
+    --series: #3987e5;
+    --border: rgba(255,255,255,0.10);
+  }
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--page);
+  color: var(--ink);
+  font: 16px/1.6 system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+main { max-width: 780px; margin: 0 auto; padding: 48px 20px 80px; }
+h1 { font-size: 2.1rem; line-height: 1.2; margin: 0 0 8px; }
+h2 { font-size: 1.35rem; margin: 44px 0 12px; }
+p, li { color: var(--ink-2); }
+strong { color: var(--ink); }
+a { color: var(--series); }
+.standfirst { font-size: 1.1rem; margin-bottom: 28px; }
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin: 28px 0; }
+.tile {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+}
+.tile .label { font-size: 0.78rem; color: var(--muted); }
+.tile .value { font-size: 1.7rem; font-weight: 600; color: var(--ink); line-height: 1.25; }
+.tile .sub { font-size: 0.78rem; color: var(--ink-2); }
+figure {
+  margin: 20px 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px 12px 8px;
+}
+figcaption { font-size: 0.9rem; font-weight: 600; color: var(--ink); padding: 0 6px 8px; }
+figcaption span { font-weight: 400; color: var(--muted); }
+.chart-pair { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
+svg { width: 100%; height: auto; display: block; }
+svg text { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
+.bar { fill: var(--series); }
+.gl { stroke: var(--grid); stroke-width: 1; }
+.bl { stroke: var(--axis); stroke-width: 1; }
+.tick { font-size: 11px; fill: var(--muted); font-variant-numeric: tabular-nums; }
+.xlab { font-size: 11px; fill: var(--muted); }
+.val { font-size: 12px; font-weight: 600; fill: var(--ink); }
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 16px 0;
+  font-size: 0.92rem;
+  font-variant-numeric: tabular-nums;
+}
+th { text-align: left; color: var(--muted); font-weight: 500; font-size: 0.82rem; }
+th.n, td.n { text-align: right; }
+th, td { padding: 7px 10px; border-bottom: 1px solid var(--grid); }
+td { color: var(--ink-2); }
+td:first-child { color: var(--ink); }
+footer { margin-top: 56px; font-size: 0.85rem; color: var(--muted); }
+</style>
+</head>
+<body>
+<main>
+
+<h1>32 coding agents on one MI300X</h1>
+<p class="standfirst">What a single GPU actually delivers when the clients are
+autonomous coding agents doing real work, not synthetic benchmark load.</p>
+
+<p>Most published LLM serving numbers come from synthetic load: fixed prompt
+lengths, ShareGPT replays, evenly spaced arrivals. I wanted to know what a
+single MI300X delivers when the clients are coding agents working on real
+repositories, because that workload looks nothing like the benchmarks. Every
+number here comes from a 30-minute measured window tied to a recorded
+serving-config fingerprint.</p>
+
+<p>The short version: one MI300X comfortably serves 32 concurrent coding
+agents on DeepSeek V4 Flash. Past 32 agents this configuration does not
+degrade gracefully, so I treat 32 as the practical ceiling.</p>
+
+<div class="tiles">
+  <div class="tile"><div class="label">Generation, 32 agents</div><div class="value">582</div><div class="sub">tokens/sec</div></div>
+  <div class="tile"><div class="label">Prompt processing</div><div class="value">78.3K</div><div class="sub">tokens/sec</div></div>
+  <div class="tile"><div class="label">Avg prompt per request</div><div class="value">53,194</div><div class="sub">tokens in, 390 out</div></div>
+  <div class="tile"><div class="label">Prefix cache hit</div><div class="value">93%</div><div class="sub">the load-bearing metric</div></div>
+</div>
+
+<h2>The workload</h2>
+<p>The load generator is a bench harness I built for this: N lanes, each lane
+an <a href="https://opencode.ai">opencode</a> agent session working on a clone
+of a real open-source repo (req, oban, supabase/realtime, livebook, flask,
+pydantic, hono, excalidraw). Each lane picks up a generated task, works it
+like a contributor would (reads code, edits, runs the test suite, commits),
+and either gets its change merged or times out. All inference goes through
+one vLLM instance. Everything is scraped into Postgres every 5 seconds.</p>
+
+<p>What makes this workload different from synthetic load, measured during
+the 32-lane window:</p>
+<ul>
+<li>The average request carries <strong>53,194 prompt tokens</strong> and
+generates just <strong>390</strong>. Agents resend their whole growing
+conversation every turn.</li>
+<li>That only works because of prefix caching: the hit rate under steady load
+is <strong>93 to 99%</strong>. When it drops, everything drops.</li>
+<li>Arrivals are bursty and phase-correlated. Agents block on their own test
+suites, then all come back at once.</li>
+</ul>
+
+<p>The tasks are deliberately hard and most hit their timeout: a typical
+30-minute window at 32 lanes completes ~2,600 agent turns, merges 3 or 4
+tasks, and abandons ~25 at the timeout. This is a serving benchmark, not a
+coding-ability one; the tasks exist to generate honest load.</p>
+
+<h2>Hardware and stack</h2>
+<p>One AMD Developer Cloud box: 1&times; MI300X (192 GB HBM3), 20 vCPU,
+236 GB RAM. The agents and their test suites run on the same box as the
+engine, which is realistic and occasionally consequential.</p>
+
+<p>Serving is the pinned open-source
+<a href="https://github.com/ryanzhou/deepseek-v4-flash-mi300x">deepseek-v4-flash-mi300x</a>
+stack: vLLM nightly <code>0.26.1rc1.dev229</code> (ROCm), DeepSeek V4 Flash
+at 262k context, MLA + DSA sparse attention, speculative decoding (~49%
+draft acceptance, stable across every window), and a 96 GB CPU KV offload
+tier. Plus two sets of overlays from this repo: two upstream vLLM bugfixes
+for a KV-zeroing kernel that was page-faulting the GPU under load, and the
+AITER GEMM tuning described below.</p>
+
+<h2>Concurrency sweep</h2>
+<p>30-minute windows per lane count, engine warm, cache hit gated above 90%
+before each window starts. The first three configurations are the untuned
+stack; the fourth is the same 32-lane load after tuning, on a freshly
+provisioned box.</p>
+
+<div class="chart-pair">
+<figure>
+<figcaption>Generation throughput <span>tokens/sec by agent count</span></figcaption>
+<svg viewBox="0 0 340 248" role="img" aria-label="Bar chart: generation tokens per second at 8, 16, 32 agents and 32 agents tuned. Values 358, 448, 533, 582.">
+  <line class="gl" x1="44" y1="150.7" x2="332" y2="150.7"/>
+  <line class="gl" x1="44" y1="89.3" x2="332" y2="89.3"/>
+  <line class="gl" x1="44" y1="28" x2="332" y2="28"/>
+  <text class="tick" x="38" y="216" text-anchor="end">0</text>
+  <text class="tick" x="38" y="154.7" text-anchor="end">200</text>
+  <text class="tick" x="38" y="93.3" text-anchor="end">400</text>
+  <text class="tick" x="38" y="32" text-anchor="end">600</text>
+  <path class="bar" d="M68 212 V106.2 Q68 102.2 72 102.2 H88 Q92 102.2 92 106.2 V212 Z"><title>8 agents: 358 tok/s</title></path>
+  <path class="bar" d="M140 212 V78.6 Q140 74.6 144 74.6 H160 Q164 74.6 164 78.6 V212 Z"><title>16 agents: 448 tok/s</title></path>
+  <path class="bar" d="M212 212 V52.5 Q212 48.5 216 48.5 H232 Q236 48.5 236 52.5 V212 Z"><title>32 agents: 533 tok/s</title></path>
+  <path class="bar" d="M284 212 V37.5 Q284 33.5 288 33.5 H304 Q308 33.5 308 37.5 V212 Z"><title>32 agents, tuned: 582 tok/s</title></path>
+  <text class="val" x="80" y="94.2" text-anchor="middle">358</text>
+  <text class="val" x="152" y="66.6" text-anchor="middle">448</text>
+  <text class="val" x="224" y="40.5" text-anchor="middle">533</text>
+  <text class="val" x="296" y="25.5" text-anchor="middle">582</text>
+  <line class="bl" x1="44" y1="212" x2="332" y2="212"/>
+  <text class="xlab" x="80" y="232" text-anchor="middle">8</text>
+  <text class="xlab" x="152" y="232" text-anchor="middle">16</text>
+  <text class="xlab" x="224" y="232" text-anchor="middle">32</text>
+  <text class="xlab" x="296" y="232" text-anchor="middle">32 tuned</text>
+</svg>
+</figure>
+<figure>
+<figcaption>Prompt throughput <span>tokens/sec by agent count</span></figcaption>
+<svg viewBox="0 0 340 248" role="img" aria-label="Bar chart: prompt tokens per second at 8, 16, 32 agents and 32 agents tuned. Values 54.0K, 75.5K, 64.4K, 78.3K.">
+  <line class="gl" x1="44" y1="166" x2="332" y2="166"/>
+  <line class="gl" x1="44" y1="120" x2="332" y2="120"/>
+  <line class="gl" x1="44" y1="74" x2="332" y2="74"/>
+  <line class="gl" x1="44" y1="28" x2="332" y2="28"/>
+  <text class="tick" x="38" y="216" text-anchor="end">0</text>
+  <text class="tick" x="38" y="170" text-anchor="end">20K</text>
+  <text class="tick" x="38" y="124" text-anchor="end">40K</text>
+  <text class="tick" x="38" y="78" text-anchor="end">60K</text>
+  <text class="tick" x="38" y="32" text-anchor="end">80K</text>
+  <path class="bar" d="M68 212 V91.8 Q68 87.8 72 87.8 H88 Q92 87.8 92 91.8 V212 Z"><title>8 agents: 54,020 tok/s</title></path>
+  <path class="bar" d="M140 212 V42.3 Q140 38.3 144 38.3 H160 Q164 38.3 164 42.3 V212 Z"><title>16 agents: 75,517 tok/s</title></path>
+  <path class="bar" d="M212 212 V67.8 Q212 63.8 216 63.8 H232 Q236 63.8 236 67.8 V212 Z"><title>32 agents: 64,441 tok/s</title></path>
+  <path class="bar" d="M284 212 V36 Q284 32 288 32 H304 Q308 32 308 36 V212 Z"><title>32 agents, tuned: 78,262 tok/s</title></path>
+  <text class="val" x="80" y="79.8" text-anchor="middle">54.0K</text>
+  <text class="val" x="152" y="30.3" text-anchor="middle">75.5K</text>
+  <text class="val" x="224" y="55.8" text-anchor="middle">64.4K</text>
+  <text class="val" x="296" y="24" text-anchor="middle">78.3K</text>
+  <line class="bl" x1="44" y1="212" x2="332" y2="212"/>
+  <text class="xlab" x="80" y="232" text-anchor="middle">8</text>
+  <text class="xlab" x="152" y="232" text-anchor="middle">16</text>
+  <text class="xlab" x="224" y="232" text-anchor="middle">32</text>
+  <text class="xlab" x="296" y="232" text-anchor="middle">32 tuned</text>
+</svg>
+</figure>
+</div>
+
+<table>
+<thead><tr><th>agents</th><th class="n">gen tok/s</th><th class="n">prompt tok/s</th><th class="n">TTFT p50</th><th class="n">TTFT p99</th><th class="n">cache hit</th></tr></thead>
+<tbody>
+<tr><td>8</td><td class="n">358</td><td class="n">54,020</td><td class="n">&le;0.75s</td><td class="n">&le;5s</td><td class="n">99%</td></tr>
+<tr><td>16</td><td class="n">448</td><td class="n">75,517</td><td class="n">&le;1s</td><td class="n">&le;5s</td><td class="n">98%</td></tr>
+<tr><td>32</td><td class="n">533</td><td class="n">64,441</td><td class="n">&le;2.5s</td><td class="n">&le;20s</td><td class="n">94%</td></tr>
+<tr><td>32, tuned</td><td class="n">582</td><td class="n">78,262</td><td class="n">&le;1s</td><td class="n">&le;5s</td><td class="n">93%</td></tr>
+</tbody>
+</table>
+
+<p>The GPU runs at 97% utilization drawing ~717 W during the 32-lane window,
+and the queue stays near empty: the engine is keeping up with demand, not
+saturating. Scaling from 8 to 32 lanes costs about half a second of median
+TTFT and buys 63% more generation throughput.</p>
+
+<h2>What tuning bought</h2>
+<p>The stack ships AITER GEMM tuning for prefill sizes this workload never
+produces (the scheduler caps prefill chunks below every tuned shape), so
+~70% of engine log lines were config-lookup misses falling back to default
+kernels. Fixing that was worth 18%: a scheduler config that lets prefill
+chunks reach a tuned size, an overlay that resolves a lookup miss to the
+nearest tuned shape, and a grid-tuning session that added 105 tuned shapes
+so the hop is always short. Result: zero config misses over a full window.</p>
+
+<figure>
+<figcaption>Tuning progression <span>generation tokens/sec, 32 agents</span></figcaption>
+<svg viewBox="0 0 680 248" role="img" aria-label="Bar chart: generation tokens per second across four tuning stages. Baseline 533, m2688 scheduler 612, M round-up 614, grid tables 627.">
+  <line class="gl" x1="44" y1="156.2" x2="668" y2="156.2"/>
+  <line class="gl" x1="44" y1="100.5" x2="668" y2="100.5"/>
+  <line class="gl" x1="44" y1="44.7" x2="668" y2="44.7"/>
+  <text class="tick" x="38" y="216" text-anchor="end">0</text>
+  <text class="tick" x="38" y="160.2" text-anchor="end">200</text>
+  <text class="tick" x="38" y="104.5" text-anchor="end">400</text>
+  <text class="tick" x="38" y="48.7" text-anchor="end">600</text>
+  <path class="bar" d="M110 212 V67.4 Q110 63.4 114 63.4 H130 Q134 63.4 134 67.4 V212 Z"><title>Baseline: 533 tok/s</title></path>
+  <path class="bar" d="M266 212 V45.4 Q266 41.4 270 41.4 H286 Q290 41.4 290 45.4 V212 Z"><title>m2688 scheduler: 612 tok/s</title></path>
+  <path class="bar" d="M422 212 V44.8 Q422 40.8 426 40.8 H442 Q446 40.8 446 44.8 V212 Z"><title>Plus M round-up overlay: 614 tok/s</title></path>
+  <path class="bar" d="M578 212 V41.2 Q578 37.2 582 37.2 H598 Q602 37.2 602 41.2 V212 Z"><title>Plus grid-tuned tables: 627 tok/s</title></path>
+  <text class="val" x="122" y="55.4" text-anchor="middle">533</text>
+  <text class="val" x="278" y="33.4" text-anchor="middle">612</text>
+  <text class="val" x="434" y="32.8" text-anchor="middle">614</text>
+  <text class="val" x="590" y="29.2" text-anchor="middle">627</text>
+  <line class="bl" x1="44" y1="212" x2="668" y2="212"/>
+  <text class="xlab" x="122" y="232" text-anchor="middle">baseline</text>
+  <text class="xlab" x="278" y="232" text-anchor="middle">m2688 scheduler</text>
+  <text class="xlab" x="434" y="232" text-anchor="middle">+ M round-up</text>
+  <text class="xlab" x="590" y="232" text-anchor="middle">+ grid tables</text>
+</svg>
+</figure>
+
+<h2>The ceiling is a cliff</h2>
+<p>At 48 lanes this configuration does not queue politely. The working set
+spills out of GPU KV cache, the offload tier starts churning 12+ GB/min of
+evictions, prefix cache hit rate falls from 93% to under 30%, and throughput
+collapses to a small fraction of the 32-lane rate rather than plateauing.
+Scaling agents past what the KV cache can hold is not a gradual trade-off on
+this stack, so capacity-plan to the cache, not the queue.</p>
+
+<h2>Reliability</h2>
+<p>Across the final sessions: hours of sustained full-utilization load, zero
+GPU page faults, zero engine restarts. Getting there required finding and
+overlaying two upstream vLLM fixes for a KV-block-zeroing kernel that wrote
+past its buffer roughly every 14 minutes under load. That investigation,
+including three refuted hypotheses and a 186 GB core dump that turned out to
+be structurally useless, is
+<a href="https://github.com/matthusby/agent_coding_bench/blob/master/docs/investigations/gpu-page-fault.md">written up separately</a>.</p>
+
+<h2>Reproducing</h2>
+<p>The harness, overlays, tuned tables, and provisioning scripts are in
+<a href="https://github.com/matthusby/agent_coding_bench">the repo</a> under
+<code>box/</code>. Every run's serving config is fingerprinted (image digest,
+patched-file checksums, engine args, model, versions) and stored with the
+metrics, so any number above can be traced to the exact configuration that
+produced it. The AITER tuning method and its pitfalls are
+<a href="https://github.com/matthusby/agent_coding_bench/blob/master/docs/investigations/aiter-gemm-tuning.md">documented here</a>.</p>
+
+<footer>Measured August 2026 on an AMD Developer Cloud MI300X droplet.</footer>
+
+</main>
+</body>
+</html>
