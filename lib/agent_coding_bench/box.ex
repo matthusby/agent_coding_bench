@@ -42,7 +42,9 @@ defmodule AgentCodingBench.Box do
   @spec capture_fingerprint() ::
           {:ok, %{fingerprint: map(), digest: String.t()}} | {:error, term()}
   def capture_fingerprint do
-    Fingerprint.capture(&exec/2, &Req.request/1, config!(:vllm_url))
+    # The probe completion queues behind live traffic; a saturated engine can hold it for minutes.
+    request = &Req.request(Keyword.put_new(&1, :receive_timeout, 600_000))
+    Fingerprint.capture(&exec/2, request, config!(:vllm_url))
   end
 
   @doc """
