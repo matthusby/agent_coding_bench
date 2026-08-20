@@ -39,7 +39,7 @@ body {
   color: var(--ink);
   font: 16px/1.6 system-ui, -apple-system, "Segoe UI", sans-serif;
 }
-main { max-width: 780px; margin: 0 auto; padding: 48px 20px 80px; }
+main { max-width: 920px; margin: 0 auto; padding: 48px 20px 80px; }
 h1 { font-size: 2.1rem; line-height: 1.2; margin: 0 0 8px; }
 h2 { font-size: 1.35rem; margin: 44px 0 12px; }
 p, li { color: var(--ink-2); }
@@ -94,7 +94,10 @@ footer { margin-top: 56px; font-size: 0.85rem; color: var(--muted); }
 
 <h1>32 coding agents on one MI300X</h1>
 <p class="standfirst">What a single GPU actually delivers when the clients are
-autonomous coding agents doing real work, not synthetic benchmark load.</p>
+autonomous coding agents doing real work, not synthetic benchmark load.
+Built on the open-source
+<a href="https://github.com/ryanzhou/deepseek-v4-flash-mi300x">deepseek-v4-flash-mi300x</a>
+serving stack.</p>
 
 <p>Most published LLM serving numbers come from synthetic load: fixed prompt
 lengths, ShareGPT replays, evenly spaced arrivals. I wanted to know what a
@@ -216,12 +219,12 @@ provisioned box.</p>
 </div>
 
 <table>
-<thead><tr><th>agents</th><th class="n">gen tok/s</th><th class="n">prompt tok/s</th><th class="n">TTFT p50</th><th class="n">TTFT p99</th><th class="n">cache hit</th></tr></thead>
+<thead><tr><th>agents</th><th class="n">gen tok/s</th><th class="n">gen tok/s per agent</th><th class="n">prompt tok/s</th><th class="n">TTFT p50</th><th class="n">TTFT p99</th><th class="n">cache hit</th></tr></thead>
 <tbody>
-<tr><td>8</td><td class="n">358</td><td class="n">54,020</td><td class="n">&le;0.75s</td><td class="n">&le;5s</td><td class="n">99%</td></tr>
-<tr><td>16</td><td class="n">448</td><td class="n">75,517</td><td class="n">&le;1s</td><td class="n">&le;5s</td><td class="n">98%</td></tr>
-<tr><td>32</td><td class="n">533</td><td class="n">64,441</td><td class="n">&le;2.5s</td><td class="n">&le;20s</td><td class="n">94%</td></tr>
-<tr><td>32, tuned</td><td class="n">582</td><td class="n">78,262</td><td class="n">&le;1s</td><td class="n">&le;5s</td><td class="n">93%</td></tr>
+<tr><td>8</td><td class="n">358</td><td class="n">44.8</td><td class="n">54,020</td><td class="n">&le;0.75s</td><td class="n">&le;5s</td><td class="n">99%</td></tr>
+<tr><td>16</td><td class="n">448</td><td class="n">28.0</td><td class="n">75,517</td><td class="n">&le;1s</td><td class="n">&le;5s</td><td class="n">98%</td></tr>
+<tr><td>32</td><td class="n">533</td><td class="n">16.7</td><td class="n">64,441</td><td class="n">&le;2.5s</td><td class="n">&le;20s</td><td class="n">94%</td></tr>
+<tr><td>32, tuned</td><td class="n">582</td><td class="n">18.2</td><td class="n">78,262</td><td class="n">&le;1s</td><td class="n">&le;5s</td><td class="n">93%</td></tr>
 </tbody>
 </table>
 
